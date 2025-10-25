@@ -64,7 +64,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -78,7 +78,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -102,7 +102,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -156,10 +156,10 @@ TextureImporter:
       name: Wire-Fence_Opening_Sheet8_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 5
-        width: 18
-        height: 17
+        x: 1
+        y: 6
+        width: 16
+        height: 16
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -178,10 +178,10 @@ TextureImporter:
       name: Wire-Fence_Opening_Sheet8_1
       rect:
         serializedVersion: 2
-        x: 20
-        y: 4
-        width: 18
-        height: 18
+        x: 21
+        y: 5
+        width: 16
+        height: 17
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -200,10 +200,10 @@ TextureImporter:
       name: Wire-Fence_Opening_Sheet8_2
       rect:
         serializedVersion: 2
-        x: 40
-        y: 3
-        width: 18
-        height: 19
+        x: 41
+        y: 4
+        width: 16
+        height: 18
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -222,10 +222,10 @@ TextureImporter:
       name: Wire-Fence_Opening_Sheet8_3
       rect:
         serializedVersion: 2
-        x: 60
-        y: 0
-        width: 18
-        height: 22
+        x: 61
+        y: 1
+        width: 16
+        height: 21
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -244,10 +244,10 @@ TextureImporter:
       name: Wire-Fence_Opening_Sheet8_4
       rect:
         serializedVersion: 2
-        x: 80
-        y: 0
-        width: 7
-        height: 22
+        x: 81
+        y: 1
+        width: 5
+        height: 20
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -266,10 +266,10 @@ TextureImporter:
       name: Wire-Fence_Opening_Sheet8_5
       rect:
         serializedVersion: 2
-        x: 90
-        y: 0
-        width: 8
-        height: 22
+        x: 91
+        y: 1
+        width: 6
+        height: 20
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -288,10 +288,10 @@ TextureImporter:
       name: Wire-Fence_Opening_Sheet8_6
       rect:
         serializedVersion: 2
-        x: 99
-        y: 0
-        width: 6
-        height: 22
+        x: 100
+        y: 1
+        width: 4
+        height: 20
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -310,10 +310,10 @@ TextureImporter:
       name: Wire-Fence_Opening_Sheet8_7
       rect:
         serializedVersion: 2
-        x: 113
+        x: 114
         y: 0
-        width: 12
-        height: 22
+        width: 10
+        height: 21
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -332,10 +332,10 @@ TextureImporter:
       name: Wire-Fence_Opening_Sheet8_8
       rect:
         serializedVersion: 2
-        x: 133
+        x: 134
         y: 0
-        width: 11
-        height: 22
+        width: 9
+        height: 21
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -354,10 +354,10 @@ TextureImporter:
       name: Wire-Fence_Opening_Sheet8_9
       rect:
         serializedVersion: 2
-        x: 154
+        x: 155
         y: 0
-        width: 6
-        height: 22
+        width: 5
+        height: 21
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -376,7 +376,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 9c4caa97120f7d441abfa32bda46c03e
     internalID: 0
     vertices: []
     indices: 
