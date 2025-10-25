@@ -46,7 +46,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -60,7 +60,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -84,7 +84,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -160,9 +160,9 @@ TextureImporter:
       name: Zombie_Big_Up_Walk-Sheet8_1
       rect:
         serializedVersion: 2
-        x: 15
+        x: 16
         y: 0
-        width: 17
+        width: 16
         height: 24
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -184,7 +184,7 @@ TextureImporter:
         serializedVersion: 2
         x: 32
         y: 0
-        width: 17
+        width: 16
         height: 24
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -206,7 +206,7 @@ TextureImporter:
         serializedVersion: 2
         x: 48
         y: 0
-        width: 80
+        width: 16
         height: 24
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -222,11 +222,99 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Zombie_Big_Up_Walk-Sheet8_4
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 16
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 5989765378222cc4e8c9e7486dac7afe
+      internalID: 1719622406
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Zombie_Big_Up_Walk-Sheet8_5
+      rect:
+        serializedVersion: 2
+        x: 80
+        y: 0
+        width: 16
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9482a427fc095f44796accfef7b6d7ec
+      internalID: 496235550
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Zombie_Big_Up_Walk-Sheet8_6
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 16
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 8940bd79874d5e44784de8d1d5ce47fb
+      internalID: 645154374
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Zombie_Big_Up_Walk-Sheet8_7
+      rect:
+        serializedVersion: 2
+        x: 112
+        y: 0
+        width: 16
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 023f6e945b8594e41bf5ff96885aeb55
+      internalID: -729026264
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 9baf237b1bff02d458a9eece03db3ac8
     internalID: 0
     vertices: []
     indices: 
@@ -240,6 +328,10 @@ TextureImporter:
       Zombie_Big_Up_Walk-Sheet8_1: 3237531686680709282
       Zombie_Big_Up_Walk-Sheet8_2: 8814173321124688633
       Zombie_Big_Up_Walk-Sheet8_3: -8005142269203412955
+      Zombie_Big_Up_Walk-Sheet8_4: 1719622406
+      Zombie_Big_Up_Walk-Sheet8_5: 496235550
+      Zombie_Big_Up_Walk-Sheet8_6: 645154374
+      Zombie_Big_Up_Walk-Sheet8_7: -729026264
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
