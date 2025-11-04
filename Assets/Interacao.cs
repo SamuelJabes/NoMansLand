@@ -2,7 +2,7 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-public class PlayerMovement : MonoBehaviour
+public class Interacao : MonoBehaviour
 {
     public TextMeshProUGUI messageText;
     public GameObject buyButton;
