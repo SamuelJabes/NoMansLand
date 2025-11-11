@@ -36,18 +36,12 @@ public class Interacao : MonoBehaviour
             currentDoor = other.transform.parent.gameObject; // Pega o objeto pai (a porta)
             Debug.Log("Player próximo à porta!");
 
-            // Código do LineRenderer usando o objeto pai
-            LineRenderer line = currentDoor.GetComponent<LineRenderer>();
-            Vector3[] positions = new Vector3[5];
-            Vector3 size = currentDoor.GetComponent<Collider2D>().bounds.size;
-
-            positions[0] = other.transform.position + new Vector3(-size.x / 2, -size.y / 2, 0);
-            positions[1] = other.transform.position + new Vector3(-size.x / 2, size.y / 2, 0);
-            positions[2] = other.transform.position + new Vector3(size.x / 2, size.y / 2, 0);
-            positions[3] = other.transform.position + new Vector3(size.x / 2, -size.y / 2, 0);
-            positions[4] = positions[0];
-
-            line.SetPositions(positions);
+            // Muda a cor da porta para branco
+            SpriteRenderer spriteRenderer = currentDoor.GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = Color.white;
+            }
 
             // Mostra o texto e o botão
             messageText.gameObject.SetActive(true);
@@ -59,6 +53,13 @@ public class Interacao : MonoBehaviour
     {
         if (other.CompareTag("PortaTrigger"))
         {
+            // Volta a cor original da porta (vermelho)
+            SpriteRenderer spriteRenderer = currentDoor.GetComponent<SpriteRenderer>();
+            if (spriteRenderer != null)
+            {
+                spriteRenderer.color = Color.red; // Mude para a cor original da sua porta
+            }
+
             messageText.gameObject.SetActive(false);
             buyButton.SetActive(false);
             currentDoor = null;
@@ -68,6 +69,7 @@ public class Interacao : MonoBehaviour
      // Método para ser chamado pelo botão
     public void BuyDoor()
     {
+        Debug.Log("BuyDoor chamado!");
         if (currentDoor != null)
         {
             Debug.Log("Comprando a porta!");
@@ -77,6 +79,10 @@ public class Interacao : MonoBehaviour
             // Destroi o objeto da porta
             Destroy(currentDoor);
             currentDoor = null;
+        }
+        else
+        {
+            Debug.Log("currentDoor é null!");
         }
     }
 }
