@@ -1,10 +1,13 @@
 fileFormatVersion: 2
-guid: 7524f9aac5a56c245a04b56a5f4ef073
+guid: 557232b92db4a254f8fd82783d5f5f0f
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -706098036234868205
-    second: Gun_side-left_idle-and-run-Sheet6_0
+      213: 2204098441249661425
+    second: ak_0
+  - first:
+      213: 7053599405962837876
+    second: ak_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -126,13 +129,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Gun_side-left_idle-and-run-Sheet6_0
+      name: ak_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 96
-        height: 10
+        x: 33
+        y: 29
+        width: 242
+        height: 105
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -141,8 +144,30 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 31aae9db39f6336f0800000000000000
-      internalID: -706098036234868205
+      spriteID: 1f1ada0cad7869e10800000000000000
+      internalID: 2204098441249661425
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: ak_1
+      rect:
+        serializedVersion: 2
+        x: 156
+        y: 24
+        width: 34
+        height: 6
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 47f3254c94b63e160800000000000000
+      internalID: 7053599405962837876
       vertices: []
       indices: 
       edges: []
@@ -161,7 +186,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Gun_side-left_idle-and-run-Sheet6_0: -706098036234868205
+      ak_0: 2204098441249661425
+      ak_1: 7053599405962837876
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

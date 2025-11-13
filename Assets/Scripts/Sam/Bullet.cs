@@ -25,11 +25,22 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.TryGetComponent<EnemyHealth>(out var enemy))
+        // ignora o player, se quiser (deixa só se seu player tiver Tag "Player")
+        if (other.CompareTag("Player"))
+            return;
+
+        //printar o nome do objeto
+        //Debug.Log(other.name);
+
+        // procura EnemyHealth no objeto ou em QUALQUER PAI (ex: Hitbox filho do Zumbi)
+        EnemyHealth enemy = other.GetComponentInParent<EnemyHealth>();
+        Debug.Log(enemy.name);
+        if (enemy != null)
         {
             enemy.TakeDamage(damage);
-        }
-        Despawn();
+    }
+
+    Despawn();
     }
 
     void Despawn()
