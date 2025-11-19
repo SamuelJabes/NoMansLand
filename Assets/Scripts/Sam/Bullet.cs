@@ -1,4 +1,4 @@
-using UnityEngine;
+Ôªøusing UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class Bullet : MonoBehaviour
@@ -25,8 +25,8 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        // se encostou em inimigo, o EnemyHealth j· vai destruir a bala,
-        // ent„o aqui n„o faz nada
+        // se encostou em inimigo, o EnemyHealth j√° vai destruir a bala,
+        // ent√£o aqui n√£o faz nada
         if (other.GetComponentInParent<EnemyHealth>() != null)
             return;
 
