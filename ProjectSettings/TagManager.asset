@@ -13,12 +13,12 @@ TagManager:
   - 
   - Water
   - UI
+  - player
+  - enemy
+  - enemy_hitbox
+  - Wall
   - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - playerbullet
   - 
   - 
   - 
@@ -42,6 +42,15 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: background
+    uniqueID: 2865027745
+    locked: 0
+  - name: obj
+    uniqueID: 3281065559
+    locked: 0
+  - name: det
+    uniqueID: 297580467
     locked: 0
   m_RenderingLayers:
   - Default

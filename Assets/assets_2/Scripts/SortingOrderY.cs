@@ -15,6 +15,6 @@ public class SortingOrderY : MonoBehaviour
     void LateUpdate()
     {
         // Quanto menor o Y, maior o sortingOrder (fica “na frente”)
-        sr.sortingOrder = -(int)(transform.position.y * 100) + offset;
+        //sr.sortingOrder = -(int)(transform.position.y * 100) + offset;
     }
 }
