@@ -265,7 +265,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1acc0936fa9c784491627d73e373c53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 15
+  maxHealth: 8
   pool: {fileID: 0}
   scoreValue: 3
   useMaterialSwap: 1
