@@ -1,4 +1,5 @@
 using System.Collections;
+using System;
 using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour
@@ -11,6 +12,10 @@ public class EnemyHealth : MonoBehaviour
     [Header("Pooling")]
     [Tooltip("Pool ao qual este inimigo pertence (é setado automaticamente pelo ObjectPool).")]
     public ObjectPool pool;
+
+    [Header("Score")]
+    public int scoreValue = 1;
+    public static event Action<EnemyHealth> OnAnyEnemyDied;
 
     [Header("Feedback de Dano (Escolha 1)")]
     public bool useMaterialSwap = false;
@@ -68,7 +73,6 @@ public class EnemyHealth : MonoBehaviour
         RestoreVisuals();
     }
 
-
     // ======================
     // AQUI O DANO ACONTECE
     // ======================
@@ -110,6 +114,7 @@ public class EnemyHealth : MonoBehaviour
 
         if (currentHealth <= 0)
         {
+            dead = true; // CRÍTICO: marca como morto IMEDIATAMENTE antes de chamar Die()
             Die();
         }
     }
@@ -152,12 +157,12 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
-        if (dead) return;
-        dead = true;
-
         // desativa colisores pra não tomar mais tiro / bater em nada
         var cols = GetComponentsInChildren<Collider2D>();
         foreach (var c in cols) c.enabled = false;
+
+        // INCREMENTO DO SCORE (sua mudança)
+        OnAnyEnemyDied?.Invoke(this);
 
         // aqui você pode tocar animação de morte, som, etc.
         StartCoroutine(DespawnAfterDelay(0.1f));
