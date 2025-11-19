@@ -12,22 +12,22 @@ public class ScoreManager : MonoBehaviour
     [Tooltip("Prefixo que aparece antes do número.")]
     public string prefix = "Score: ";
 
-    [Tooltip("Quantos dígitos com zero à esquerda (ex.: 2 => 00, 01, 12).")]
-    public int minDigits = 2;   // 2 dígitos
+    [Tooltip("Quantos dígitos com zero à esquerda (ex.: 3 => 000, 001, 012).")]
+    public int minDigits = 3;   // 3 dígitos para o SCORE
 
     [Header("Coin UI")]
     [Tooltip("Texto TMP que mostra a quantidade de moedas (ex.: CoinText).")]
     public TMP_Text coinText;
 
-    [Tooltip("Dígitos das coins (2 => 00, 01, 12).")]
-    public int coinDigits = 2;
+    [Tooltip("Dígitos das coins (5 => 00000, 00001, 00123).")]
+    public int coinDigits = 5;  // 5 dígitos para COINS
 
-    [Tooltip("Quantos pontos de score geram 1 coin.")]
-    public int scorePerCoin = 10;
+    [Header("Conversão")]
+    [Tooltip("Quantas moedas ganha para cada 1 ponto de score.")]
+    public int coinsPerScore = 10;   // 1 score => 10 coins
 
     private int score;
     private int coins;
-    private int scoreRemainder;   // acumula até bater scorePerCoin
 
     void Awake()
     {
@@ -68,12 +68,11 @@ public class ScoreManager : MonoBehaviour
         score += amount;
         if (score < 0) score = 0;
 
-        // acumula para conversão em coins
-        scoreRemainder += amount;
-        while (scoreRemainder >= scorePerCoin)
+        // NOVO: conversão direta score -> coins (1 score => coinsPerScore moedas)
+        int coinsToAdd = amount * Mathf.Max(0, coinsPerScore);
+        if (coinsToAdd > 0)
         {
-            scoreRemainder -= scorePerCoin;
-            AddCoins(1);
+            AddCoins(coinsToAdd);
         }
 
         UpdateScoreUI();
@@ -86,7 +85,6 @@ public class ScoreManager : MonoBehaviour
     public void ResetScore()
     {
         score = 0;
-        scoreRemainder = 0;
         UpdateScoreUI();
     }
 
@@ -95,7 +93,7 @@ public class ScoreManager : MonoBehaviour
     void UpdateScoreUI()
     {
         if (!scoreText) return;
-        string formatted = score.ToString("D" + Mathf.Max(1, minDigits));
+        string formatted = score.ToString("D" + Mathf.Max(1, minDigits)); // ex.: 000, 001, 120
         scoreText.text = $"{prefix}{formatted}";
     }
 
@@ -134,7 +132,7 @@ public class ScoreManager : MonoBehaviour
     void UpdateCoinUI()
     {
         if (!coinText) return;
-        string formatted = coins.ToString("D" + Mathf.Max(1, coinDigits));
+        string formatted = coins.ToString("D" + Mathf.Max(1, coinDigits)); // ex.: 00000, 00010, 00150
         coinText.text = formatted;
     }
 
@@ -142,7 +140,6 @@ public class ScoreManager : MonoBehaviour
     {
         score = 0;
         coins = 0;
-        scoreRemainder = 0;
         UpdateScoreUI();
         UpdateCoinUI();
     }
