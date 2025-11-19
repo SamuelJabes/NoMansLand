@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Collider2D))]
 public class Bullet : MonoBehaviour
@@ -25,22 +25,13 @@ public class Bullet : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        // ignora o player, se quiser (deixa s� se seu player tiver Tag "Player")
-        if (other.CompareTag("Player"))
+        // se encostou em inimigo, o EnemyHealth já vai destruir a bala,
+        // então aqui não faz nada
+        if (other.GetComponentInParent<EnemyHealth>() != null)
             return;
 
-        //printar o nome do objeto
-        //Debug.Log(other.name);
-
-        // procura EnemyHealth no objeto ou em QUALQUER PAI (ex: Hitbox filho do Zumbi)
-        EnemyHealth enemy = other.GetComponentInParent<EnemyHealth>();
-        Debug.Log(enemy.name);
-        if (enemy != null)
-        {
-            enemy.TakeDamage(damage);
-    }
-
-    Despawn();
+        // parede / props / qualquer coisa -> some
+        Despawn();
     }
 
     void Despawn()
