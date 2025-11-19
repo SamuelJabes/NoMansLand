@@ -1,4 +1,5 @@
 using System.Collections;
+using System;
 using UnityEngine;
 
 public class EnemyHealth : MonoBehaviour
@@ -8,38 +9,98 @@ public class EnemyHealth : MonoBehaviour
     int currentHealth;
     bool dead;
 
-    [Header("Feedback de Dano (Escolha 1)")]
-    [Tooltip("Se marcado, usa troca de material (mais robusto contra animações que keyframam cor).")]
-    public bool useMaterialSwap = false;
+    [Header("Pooling")]
+    [Tooltip("Pool ao qual este inimigo pertence (é setado automaticamente pelo ObjectPool).")]
+    public ObjectPool pool;
 
-    [Tooltip("Material de flash (ex.: um material que deixa a sprite bem clara). Se vazio, cai no tint de cor.")]
+    [Header("Score")]
+    public int scoreValue = 1;
+    public static event Action<EnemyHealth> OnAnyEnemyDied;
+
+    [Header("Feedback de Dano (Escolha 1)")]
+    public bool useMaterialSwap = false;
     public Material flashMaterial;
 
     [Header("Feedback via Tint (Escolha 2)")]
-    [Tooltip("Cor aplicada temporariamente nos SpriteRenderers (se não usar material swap).")]
-    public Color flashColor = new Color(1f, 0.95f, 0.8f); // 'branco quente' para aparecer melhor que branco puro
+    public Color flashColor = new Color(1f, 0.95f, 0.8f);
     public float flashDuration = 0.08f;
 
-    // Cache de renderers e estados originais
     SpriteRenderer[] renderers;
     Color[] baseColors;
     Material[] baseMaterials;
 
     void Awake()
     {
-        // Pega TODOS os SpriteRenderers (no próprio GO e nos filhos)
         renderers = GetComponentsInChildren<SpriteRenderer>(includeInactive: false);
 
-        // Guarda cores e materiais originais
         baseColors = new Color[renderers.Length];
         baseMaterials = new Material[renderers.Length];
         for (int i = 0; i < renderers.Length; i++)
         {
             baseColors[i] = renderers[i].color;
-            baseMaterials[i] = renderers[i].sharedMaterial; // sharedMaterial para não instanciar cópias
+            baseMaterials[i] = renderers[i].sharedMaterial;
+        }
+    }
+
+    void OnEnable()
+    {
+        // reset estado quando volta do pool
+        dead = false;
+        currentHealth = maxHealth;
+
+        // reativa colisores
+        var cols = GetComponentsInChildren<Collider2D>(includeInactive: true);
+        foreach (var c in cols) c.enabled = true;
+
+        // reativa sprites e força alpha 1
+        if (renderers == null || renderers.Length == 0)
+            renderers = GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
+
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            var r = renderers[i];
+            if (!r) continue;
+
+            r.enabled = true;
+
+            // garante que não ficou transparente
+            var col = baseColors != null && baseColors.Length > i ? baseColors[i] : Color.white;
+            col.a = 1f;
+            r.color = col;
         }
 
-        currentHealth = maxHealth;
+        // reseta visuais (materiais)
+        RestoreVisuals();
+    }
+
+    // ======================
+    // AQUI O DANO ACONTECE
+    // ======================
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        int dmg = 0;
+
+        // Bala normal
+        Bullet bullet = other.GetComponent<Bullet>();
+        if (bullet != null)
+        {
+            dmg = bullet.damage;
+            Destroy(bullet.gameObject); // some com a bala
+        }
+        else
+        {
+            // Pellet de shotgun
+            ShotgunPellet pellet = other.GetComponent<ShotgunPellet>();
+            if (pellet != null)
+            {
+                dmg = pellet.damage;
+                Destroy(pellet.gameObject); // some com o pellet
+            }
+        }
+
+        if (dmg <= 0) return; // não era projétil
+
+        TakeDamage(dmg);
     }
 
     public void TakeDamage(int amount)
@@ -48,12 +109,12 @@ public class EnemyHealth : MonoBehaviour
 
         currentHealth -= amount;
 
-        // Para qualquer flash anterior e inicia um novo
         StopAllCoroutines();
         StartCoroutine(FlashOnce());
 
         if (currentHealth <= 0)
         {
+            dead = true; // CRÍTICO: marca como morto IMEDIATAMENTE antes de chamar Die()
             Die();
         }
     }
@@ -62,17 +123,14 @@ public class EnemyHealth : MonoBehaviour
     {
         if (useMaterialSwap && flashMaterial != null)
         {
-            // === Estratégia 1: Troca de material ===
             for (int i = 0; i < renderers.Length; i++)
             {
-                // só troca se for diferente para evitar gerar instâncias desnecessárias
                 if (renderers[i] && renderers[i].sharedMaterial != flashMaterial)
                     renderers[i].sharedMaterial = flashMaterial;
             }
 
             yield return new WaitForSeconds(flashDuration);
 
-            // restaura materiais
             for (int i = 0; i < renderers.Length; i++)
             {
                 if (renderers[i])
@@ -81,9 +139,6 @@ public class EnemyHealth : MonoBehaviour
         }
         else
         {
-            // === Estratégia 2: Tint de cor ===
-            // Observação: se sua animação tiver keyframes de SpriteRenderer.color,
-            // ela pode sobrescrever este tint. Nesse caso, prefira material swap.
             for (int i = 0; i < renderers.Length; i++)
             {
                 if (renderers[i])
@@ -102,34 +157,39 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
-        if (dead) return;
-        dead = true;
-
-        // desativa colisões
+        // desativa colisores pra não tomar mais tiro / bater em nada
         var cols = GetComponentsInChildren<Collider2D>();
         foreach (var c in cols) c.enabled = false;
 
-        // desativa visuais
-        foreach (var r in renderers) if (r) r.enabled = false;
+        // INCREMENTO DO SCORE (sua mudança)
+        OnAnyEnemyDied?.Invoke(this);
 
-        Destroy(gameObject);
+        // aqui você pode tocar animação de morte, som, etc.
+        StartCoroutine(DespawnAfterDelay(0.1f));
     }
 
-    // Se este objeto for desativado/destruído durante um flash, restaura estado
-    void OnDisable()
+    IEnumerator DespawnAfterDelay(float delay)
     {
-        RestoreVisuals();
+        yield return new WaitForSeconds(delay);
+        Despawn();
     }
-    void OnDestroy()
+
+    void Despawn()
     {
-        RestoreVisuals();
+        if (pool != null)
+        {
+            pool.ReturnObjectToPool(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
     void RestoreVisuals()
     {
         if (renderers == null) return;
 
-        // restaura cor e material originais
         for (int i = 0; i < renderers.Length; i++)
         {
             if (!renderers[i]) continue;
