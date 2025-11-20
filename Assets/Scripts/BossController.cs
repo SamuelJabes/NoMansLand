@@ -6,27 +6,30 @@ public class BossController : MonoBehaviour
     [Header("Referências")]
     [SerializeField] private Transform player;
     [SerializeField] private GameObject knifePrefab; // Prefab da faca
-    [SerializeField] private Transform firePoint; // Ponto de onde as facas saem
+    [SerializeField] private Transform firePoint;    // Ponto de onde as facas saem
+
+    [Header("Órbita do FirePoint")]
+    [SerializeField] private float firePointOrbitRadius = 1.2f; // raio da órbita em torno do boss
 
     [Header("Configuração de Ataques")]
     [SerializeField] private float timeBetweenAttacks = 3f; // Tempo entre cada ataque
-    [SerializeField] private float detectionRange = 15f; // Distância para começar a atacar
+    [SerializeField] private float detectionRange = 15f;    // Distância para começar a atacar
 
     [Header("Ataque: Lançar Facas")]
-    [SerializeField] private int knivesPerAttack = 3; // Quantas facas lançar por ataque
+    [SerializeField] private int knivesPerAttack = 3;        // Quantas facas lançar por ataque
     [SerializeField] private float timeBetweenKnives = 0.3f; // Tempo entre cada faca
     [SerializeField] private float knifeSpeed = 8f;
 
     [Header("Ataque: Corrida")]
-    [SerializeField] private float chargeSpeed = 15f; // Velocidade da corrida (aumentado!)
-    [SerializeField] private float chargeDuration = 2.5f; // Duração da corrida (aumentado!)
-    [SerializeField] private float chargePreparationTime = 0.3f; // Tempo de preparação antes de correr (reduzido!)
-    [SerializeField] private bool predictionCharge = true; // Prevê onde o player vai estar
-    [SerializeField] private float predictionMultiplier = 0.5f; // Quanto prevê o movimento
+    [SerializeField] private float chargeSpeed = 15f;             // Velocidade da corrida
+    [SerializeField] private float chargeDuration = 2.5f;         // Duração da corrida
+    [SerializeField] private float chargePreparationTime = 0.3f;  // Tempo de preparação antes de correr
+    [SerializeField] private bool predictionCharge = true;        // Prevê onde o player vai estar
+    [SerializeField] private float predictionMultiplier = 0.5f;   // Quanto prevê o movimento
 
     [Header("Movimento Normal")]
-    [SerializeField] private float normalSpeed = 3f; // Velocidade normal de perseguição
-    [SerializeField] private float stoppingDistance = 5f; // Distância mínima do player
+    [SerializeField] private float normalSpeed = 3f;        // Velocidade normal de perseguição
+    [SerializeField] private float stoppingDistance = 5f;   // Distância mínima do player
 
     private Rigidbody2D rb;
     private bool isAttacking = false;
@@ -35,30 +38,41 @@ public class BossController : MonoBehaviour
     private Vector2 chargeDirection;
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
+
     private enum AttackType { ThrowKnives, Charge }
 
     void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         spriteRenderer = GetComponent<SpriteRenderer>();
+
         if (spriteRenderer != null)
         {
             originalColor = spriteRenderer.color;
         }
+
+        // Não deixar o boss girar em Z
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+        // ou, dependendo da sua versão:
+        // rb.freezeRotation = true;
     }
 
     void Start()
     {
         if (player == null)
         {
-            // Tenta encontrar o player automaticamente pela tag
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
             if (playerObj != null)
                 player = playerObj.transform;
         }
 
-        // Inicia o ciclo de ataques
         StartCoroutine(AttackRoutine());
+    }
+
+    void Update()
+    {
+        // Atualiza posição/rotação do firePoint em torno do boss
+        UpdateFirePointOrbit();
     }
 
     void FixedUpdate()
@@ -67,33 +81,32 @@ public class BossController : MonoBehaviour
 
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
-        // Se está carregando (correndo), verifica parede e move
+        // Se está correndo no dash
         if (isCharging)
         {
-            // Raycast múltiplo para detectar paredes à frente de forma mais confiável
             float checkDistance = 1f;
             RaycastHit2D hit = Physics2D.Raycast(transform.position, chargeDirection, checkDistance, ~LayerMask.GetMask("Player"));
-            
+
             if (hit.collider != null)
             {
+                // Pare se bater em algo
                 Debug.Log("Raycast detectou obstáculo: " + hit.collider.name);
                 StopCharge();
                 return;
             }
 
-            // Usa velocity direta para movimento mais preciso
             rb.linearVelocity = chargeDirection * chargeSpeed;
             return;
         }
 
-        // Se está atacando (lançando facas), fica parado
+        // Se está em qualquer ataque (facas ou pré/pós dash) -> fica parado
         if (isAttacking)
         {
-            rb.linearVelocity = Vector2.zero;
+            StopCompletely();
             return;
         }
 
-        // Movimento normal: persegue o player mas mantém distância mínima
+        // Movimento normal: persegue o player mantendo distância mínima
         if (distanceToPlayer > stoppingDistance)
         {
             Vector2 direction = (player.position - transform.position).normalized;
@@ -101,8 +114,39 @@ public class BossController : MonoBehaviour
         }
         else
         {
-            rb.linearVelocity = Vector2.zero;
+            StopCompletely();
         }
+    }
+
+    /// <summary>
+    /// Zera completamente o movimento do boss.
+    /// </summary>
+    private void StopCompletely()
+    {
+        rb.linearVelocity = Vector2.zero;
+    }
+
+    /// <summary>
+    /// Atualiza posição e rotação do firePoint em torno do boss,
+    /// sempre apontando para o player.
+    /// </summary>
+    void UpdateFirePointOrbit()
+    {
+        if (player == null || firePoint == null) return;
+
+        Vector2 dir = (player.position - transform.position);
+        if (dir.sqrMagnitude < 0.0001f)
+            return;
+
+        dir.Normalize();
+
+        // POSIÇÃO: em uma órbita na direção do player
+        Vector2 orbitPos = (Vector2)transform.position + dir * firePointOrbitRadius;
+        firePoint.position = orbitPos;
+
+        // ROTAÇÃO: firePoint "olha" pro player (up aponta pra dir)
+        float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
+        firePoint.rotation = Quaternion.Euler(0f, 0f, angle);
     }
 
     IEnumerator AttackRoutine()
@@ -115,17 +159,15 @@ public class BossController : MonoBehaviour
 
             float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
-            // Só ataca se o player estiver dentro do alcance
             if (distanceToPlayer <= detectionRange)
             {
-                // 75% de chance de lançar facas, 25% de chance de correr
                 int randomValue = Random.Range(0, 100);
 
-                if (randomValue < 75) // 75% de chance
+                if (randomValue < 75)
                 {
                     yield return StartCoroutine(ThrowKnivesAttack());
                 }
-                else // 25% de chance
+                else
                 {
                     yield return StartCoroutine(ChargeAttack());
                 }
@@ -136,21 +178,16 @@ public class BossController : MonoBehaviour
     IEnumerator ThrowKnivesAttack()
     {
         isAttacking = true;
+        StopCompletely(); // garante boss parado enquanto lança facas
+
         Debug.Log("Boss: Lançando facas!");
 
         for (int i = 0; i < knivesPerAttack; i++)
         {
-            // Aponta para o player
-            Vector2 direction = (player.position - transform.position).normalized;
-            float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90f;
-
-            // Instancia a faca
-            if (knifePrefab != null)
+            if (knifePrefab != null && firePoint != null)
             {
-                Vector3 spawnPos = firePoint != null ? firePoint.position : transform.position;
-                GameObject knife = Instantiate(knifePrefab, spawnPos, Quaternion.Euler(0, 0, angle));
-                
-                // Configura a velocidade da faca
+                GameObject knife = Instantiate(knifePrefab, firePoint.position, firePoint.rotation);
+
                 BossKnife knifeScript = knife.GetComponent<BossKnife>();
                 if (knifeScript != null)
                 {
@@ -169,15 +206,13 @@ public class BossController : MonoBehaviour
         isAttacking = true;
         Debug.Log("Boss: Preparando corrida!");
 
-        // Preparação: fica parado por um momento
-        rb.linearVelocity = Vector2.zero;
-        
+        StopCompletely();
+
         // Calcula a direção para o player COM PREDIÇÃO
         Vector2 targetPosition = player.position;
-        
+
         if (predictionCharge)
         {
-            // Tenta prever onde o player vai estar baseado no movimento dele
             Rigidbody2D playerRb = player.GetComponent<Rigidbody2D>();
             if (playerRb != null)
             {
@@ -186,65 +221,58 @@ public class BossController : MonoBehaviour
                 Debug.Log("Boss: Prevendo posição do player!");
             }
         }
-        
+
         chargeDirection = (targetPosition - (Vector2)transform.position).normalized;
 
-        // Feedback visual: Boss fica vermelho brilhante durante preparação
+        // Feedback visual: vermelho durante preparação
         isPreparingCharge = true;
         if (spriteRenderer != null)
         {
-            spriteRenderer.color = new Color(1f, 0.3f, 0.3f); // Vermelho brilhante
+            spriteRenderer.color = new Color(1f, 0.3f, 0.3f);
         }
-        
+
         yield return new WaitForSeconds(chargePreparationTime);
 
-        // Volta a cor normal
         isPreparingCharge = false;
         if (spriteRenderer != null)
         {
             spriteRenderer.color = originalColor;
         }
 
-        // Inicia a corrida
         Debug.Log("Boss: Correndo!");
         isCharging = true;
-        isAttacking = false;
+        isAttacking = false; // agora está "só" correndo
 
-        // Corre por um tempo determinado OU até colidir
         float chargeTimer = 0f;
         while (chargeTimer < chargeDuration && isCharging)
         {
             chargeTimer += Time.deltaTime;
-            yield return null; // Espera o próximo frame
+            yield return null;
         }
 
-        // Para a corrida (se ainda estiver correndo)
         if (isCharging)
         {
             isCharging = false;
-            rb.linearVelocity = Vector2.zero;
+            StopCompletely();
             Debug.Log("Boss: Corrida finalizada por tempo!");
         }
 
-        // Pequena pausa após a corrida
+        // pequena pausa depois do dash
         yield return new WaitForSeconds(0.5f);
     }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        // Se colidir durante a corrida, causa dano ao player
         if (isCharging && collision.gameObject.CompareTag("Player"))
         {
             Health2D playerHealth = collision.gameObject.GetComponent<Health2D>();
             if (playerHealth != null)
             {
-                playerHealth.ApplyDamage(20f); // Dano da corrida
+                playerHealth.ApplyDamage(20f);
                 Debug.Log("Boss acertou o player na corrida!");
             }
-            // Para a corrida após acertar o player
             StopCharge();
         }
-        // Se colidir com qualquer outra coisa durante corrida (paredes), para
         else if (isCharging)
         {
             Debug.Log("Boss colidiu com: " + collision.gameObject.name);
@@ -254,7 +282,6 @@ public class BossController : MonoBehaviour
 
     void OnCollisionStay2D(Collision2D collision)
     {
-        // Garante que pare se ainda estiver colidindo durante a corrida
         if (isCharging)
         {
             StopCharge();
@@ -263,24 +290,22 @@ public class BossController : MonoBehaviour
 
     void StopCharge()
     {
-        if (!isCharging) return; // Já parou
-        
+        if (!isCharging) return;
+
         isCharging = false;
-        rb.linearVelocity = Vector2.zero;
-        
+        StopCompletely();
+
         Debug.Log("Boss parou a corrida por colisão!");
     }
 
-    // Visualização do alcance no Editor
     void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
         Gizmos.DrawWireSphere(transform.position, detectionRange);
-        
+
         Gizmos.color = Color.yellow;
         Gizmos.DrawWireSphere(transform.position, stoppingDistance);
 
-        // Desenha a direção do dash
         if (isCharging || isPreparingCharge)
         {
             Gizmos.color = isPreparingCharge ? Color.yellow : Color.red;
@@ -288,5 +313,9 @@ public class BossController : MonoBehaviour
             Gizmos.DrawLine(transform.position, lineEnd);
             Gizmos.DrawWireSphere(lineEnd, 0.3f);
         }
+
+        // Gizmo da órbita do firePoint
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireSphere(transform.position, firePointOrbitRadius);
     }
 }
