@@ -10,7 +10,7 @@ public class EnemyHealth : MonoBehaviour
     bool dead;
 
     [Header("Pooling")]
-    [Tooltip("Pool ao qual este inimigo pertence (é setado automaticamente pelo ObjectPool).")]
+    [Tooltip("Pool ao qual este inimigo pertence (ï¿½ setado automaticamente pelo ObjectPool).")]
     public ObjectPool pool;
 
     [Header("Score")]
@@ -52,7 +52,7 @@ public class EnemyHealth : MonoBehaviour
         var cols = GetComponentsInChildren<Collider2D>(includeInactive: true);
         foreach (var c in cols) c.enabled = true;
 
-        // reativa sprites e força alpha 1
+        // reativa sprites e forï¿½a alpha 1
         if (renderers == null || renderers.Length == 0)
             renderers = GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
 
@@ -63,7 +63,7 @@ public class EnemyHealth : MonoBehaviour
 
             r.enabled = true;
 
-            // garante que não ficou transparente
+            // garante que nï¿½o ficou transparente
             var col = baseColors != null && baseColors.Length > i ? baseColors[i] : Color.white;
             col.a = 1f;
             r.color = col;
@@ -98,7 +98,7 @@ public class EnemyHealth : MonoBehaviour
             }
         }
 
-        if (dmg <= 0) return; // não era projétil
+        if (dmg <= 0) return; // nï¿½o era projï¿½til
 
         TakeDamage(dmg);
     }
@@ -114,7 +114,7 @@ public class EnemyHealth : MonoBehaviour
 
         if (currentHealth <= 0)
         {
-            dead = true; // CRÍTICO: marca como morto IMEDIATAMENTE antes de chamar Die()
+            dead = true; // CRï¿½TICO: marca como morto IMEDIATAMENTE antes de chamar Die()
             Die();
         }
     }
@@ -157,14 +157,14 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
-        // desativa colisores pra não tomar mais tiro / bater em nada
+        // desativa colisores pra nï¿½o tomar mais tiro / bater em nada
         var cols = GetComponentsInChildren<Collider2D>();
         foreach (var c in cols) c.enabled = false;
 
-        // INCREMENTO DO SCORE (sua mudança)
+        // INCREMENTO DO SCORE (sua mudanï¿½a)
         OnAnyEnemyDied?.Invoke(this);
 
-        // aqui você pode tocar animação de morte, som, etc.
+        // aqui vocï¿½ pode tocar animaï¿½ï¿½o de morte, som, etc.
         StartCoroutine(DespawnAfterDelay(0.1f));
     }
 
@@ -196,5 +196,11 @@ public class EnemyHealth : MonoBehaviour
             renderers[i].color = baseColors[i];
             renderers[i].sharedMaterial = baseMaterials[i];
         }
+    }
+
+    // MÃ©todo pÃºblico para verificar se o inimigo estÃ¡ morto
+    public bool IsDead()
+    {
+        return dead;
     }
 }
