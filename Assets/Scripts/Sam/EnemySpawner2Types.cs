@@ -38,6 +38,10 @@ public class EnemySpawner2Types : MonoBehaviour
     [Range(0f, 1f)]
     public float bigZombieChance = 0.3f;
 
+    [Header("Limite de Spawn")]
+    [Tooltip("Máximo de zombies spawnados por ciclo (evita esgotar o pool).")]
+    public int maxSpawnsPerCycle = 5;
+
     [Header("NavMesh")]
     [Tooltip("Raio para projetar o spawn no NavMesh.")]
     public float navmeshSearchRadius = 3f;
@@ -109,7 +113,7 @@ public class EnemySpawner2Types : MonoBehaviour
     }
 
     /// <summary>
-    /// Spawna UM zumbi em CADA spawn point offscreen da área atual.
+    /// Spawna zombies em spawn points offscreen da área atual (limitado por maxSpawnsPerCycle).
     /// </summary>
     void SpawnFromAllPoints()
     {
@@ -117,8 +121,13 @@ public class EnemySpawner2Types : MonoBehaviour
         if (offscreenPoints.Count == 0)
             return;
 
-        foreach (var sp in offscreenPoints)
+        // Embaralha e limita quantidade
+        Shuffle(offscreenPoints);
+        int spawnCount = Mathf.Min(offscreenPoints.Count, maxSpawnsPerCycle);
+
+        for (int idx = 0; idx < spawnCount; idx++)
         {
+            var sp = offscreenPoints[idx];
             if (sp == null) continue;
 
             // Escolhe o pool (grande ou pequeno) pra ESTE spawn
@@ -136,7 +145,12 @@ public class EnemySpawner2Types : MonoBehaviour
             }
 
             GameObject enemy = chosenPool.RequestObjectFromPool();
-            if (enemy == null) continue;
+            if (enemy == null)
+            {
+                // pool acabou, cancela este spawn
+                continue;
+            }
+
 
             var agent = enemy.GetComponent<NavMeshAgent>();
             var enemyAI = enemy.GetComponent<Enemy>();
@@ -219,5 +233,19 @@ public class EnemySpawner2Types : MonoBehaviour
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Embaralha uma lista usando Fisher-Yates shuffle.
+    /// </summary>
+    void Shuffle<T>(List<T> list)
+    {
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            T temp = list[i];
+            list[i] = list[j];
+            list[j] = temp;
+        }
     }
 }

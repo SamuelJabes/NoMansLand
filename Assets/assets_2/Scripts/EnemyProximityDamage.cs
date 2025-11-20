@@ -31,7 +31,6 @@ public class EnemyProximityDamage : MonoBehaviour
 
         if (heartsUI == null)
             heartsUI = FindObjectOfType<HeartsHealthUI>();
-        
         // Busca o componente EnemyHealth no mesmo GameObject
         enemyHealth = GetComponent<EnemyHealth>();
     }
@@ -40,6 +39,12 @@ public class EnemyProximityDamage : MonoBehaviour
     {
         if (player == null || heartsUI == null) return;
         
+        // NÃO causa dano se o zombie estiver morto
+        if (enemyHealth != null && enemyHealth.IsDead())
+        {
+            return;
+        }
+
         // NÃO causa dano se o zombie estiver morto
         if (enemyHealth != null && enemyHealth.IsDead())
         {

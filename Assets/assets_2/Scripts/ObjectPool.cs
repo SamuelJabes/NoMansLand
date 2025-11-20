@@ -1,10 +1,10 @@
-using System.Collections.Generic;
+ï»¿using System.Collections.Generic;
 using UnityEngine;
 
 public class ObjectPool : MonoBehaviour
 {
-    [Header("Configuração")]
-    public GameObject prefab;     // Prefab que será instanciado
+    [Header("ConfiguraÃ§Ã£o")]
+    public GameObject prefab;     // Prefab que serÃ¡ instanciado
     public int poolSize = 10;     // Tamanho inicial do pool
 
     private Queue<GameObject> pool;
@@ -35,7 +35,7 @@ public class ObjectPool : MonoBehaviour
         }
     }
 
-    // Configurações específicas para objetos do pool (ex: EnemyHealth.pool = this)
+    // ConfiguraÃ§Ãµes especÃ­ficas para objetos do pool (ex: EnemyHealth.pool = this)
     private void SetupPooledObject(GameObject obj)
     {
         var enemyHealth = obj.GetComponent<EnemyHealth>();
@@ -45,7 +45,7 @@ public class ObjectPool : MonoBehaviour
         }
     }
 
-    // ========= AQUI: SÓ UMA VEZ =========
+    // ========= AQUI: SÃ“ UMA VEZ =========
     public GameObject RequestObjectFromPool()
     {
         GameObject obj;
@@ -57,11 +57,11 @@ public class ObjectPool : MonoBehaviour
         }
         else
         {
-            obj = Instantiate(prefab);
-            obj.transform.SetParent(transform, worldPositionStays: false);
-            obj.transform.localScale = Vector3.one;
-            SetupPooledObject(obj);
+            // NÃƒO SPAWNA objeto extra â†’ retorna null
+            Debug.LogWarning($"[ObjectPool] Pool '{gameObject.name}' esgotado! Sem spawn extra.");
+            return null;
         }
+
 
         return obj;
     }

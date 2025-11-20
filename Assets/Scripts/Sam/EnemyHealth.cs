@@ -31,7 +31,8 @@ public class EnemyHealth : MonoBehaviour
 
     void Awake()
     {
-        renderers = GetComponentsInChildren<SpriteRenderer>(includeInactive: false);
+        // CR�TICO: includeInactive=true para funcionar com pooling
+        renderers = GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
 
         baseColors = new Color[renderers.Length];
         baseMaterials = new Material[renderers.Length];
@@ -54,7 +55,18 @@ public class EnemyHealth : MonoBehaviour
 
         // reativa sprites e for�a alpha 1
         if (renderers == null || renderers.Length == 0)
+        {
             renderers = GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
+
+            // CR�TICO: recria arrays se necess�rio para evitar sprites invis�veis
+            baseColors = new Color[renderers.Length];
+            baseMaterials = new Material[renderers.Length];
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                baseColors[i] = renderers[i].color;
+                baseMaterials[i] = renderers[i].sharedMaterial;
+            }
+        }
 
         for (int i = 0; i < renderers.Length; i++)
         {
@@ -71,6 +83,8 @@ public class EnemyHealth : MonoBehaviour
 
         // reseta visuais (materiais)
         RestoreVisuals();
+
+        Debug.Log($"[EnemyHealth] {gameObject.name} reativado do pool com {renderers.Length} sprites");
     }
 
     // ======================
@@ -222,7 +236,7 @@ public class EnemyHealth : MonoBehaviour
         }
     }
 
-    // Método público para verificar se o inimigo está morto
+    // M�todo p�blico para verificar se o inimigo est� morto
     public bool IsDead()
     {
         return dead;
