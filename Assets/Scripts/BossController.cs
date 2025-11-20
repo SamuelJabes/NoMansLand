@@ -53,8 +53,6 @@ public class BossController : MonoBehaviour
 
         // Não deixar o boss girar em Z
         rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-        // ou, dependendo da sua versão:
-        // rb.freezeRotation = true;
     }
 
     void Start()
@@ -71,7 +69,6 @@ public class BossController : MonoBehaviour
 
     void Update()
     {
-        // Atualiza posição/rotação do firePoint em torno do boss
         UpdateFirePointOrbit();
     }
 
@@ -84,17 +81,7 @@ public class BossController : MonoBehaviour
         // Se está correndo no dash
         if (isCharging)
         {
-            float checkDistance = 1f;
-            RaycastHit2D hit = Physics2D.Raycast(transform.position, chargeDirection, checkDistance, ~LayerMask.GetMask("Player"));
-
-            if (hit.collider != null)
-            {
-                // Pare se bater em algo
-                Debug.Log("Raycast detectou obstáculo: " + hit.collider.name);
-                StopCharge();
-                return;
-            }
-
+            // AGORA: sem raycast bloqueando, só corre
             rb.linearVelocity = chargeDirection * chargeSpeed;
             return;
         }
@@ -118,18 +105,11 @@ public class BossController : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Zera completamente o movimento do boss.
-    /// </summary>
     private void StopCompletely()
     {
         rb.linearVelocity = Vector2.zero;
     }
 
-    /// <summary>
-    /// Atualiza posição e rotação do firePoint em torno do boss,
-    /// sempre apontando para o player.
-    /// </summary>
     void UpdateFirePointOrbit()
     {
         if (player == null || firePoint == null) return;
@@ -140,11 +120,9 @@ public class BossController : MonoBehaviour
 
         dir.Normalize();
 
-        // POSIÇÃO: em uma órbita na direção do player
         Vector2 orbitPos = (Vector2)transform.position + dir * firePointOrbitRadius;
         firePoint.position = orbitPos;
 
-        // ROTAÇÃO: firePoint "olha" pro player (up aponta pra dir)
         float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg - 90f;
         firePoint.rotation = Quaternion.Euler(0f, 0f, angle);
     }
@@ -178,7 +156,7 @@ public class BossController : MonoBehaviour
     IEnumerator ThrowKnivesAttack()
     {
         isAttacking = true;
-        StopCompletely(); // garante boss parado enquanto lança facas
+        StopCompletely();
 
         Debug.Log("Boss: Lançando facas!");
 
@@ -208,7 +186,6 @@ public class BossController : MonoBehaviour
 
         StopCompletely();
 
-        // Calcula a direção para o player COM PREDIÇÃO
         Vector2 targetPosition = player.position;
 
         if (predictionCharge)
@@ -224,7 +201,6 @@ public class BossController : MonoBehaviour
 
         chargeDirection = (targetPosition - (Vector2)transform.position).normalized;
 
-        // Feedback visual: vermelho durante preparação
         isPreparingCharge = true;
         if (spriteRenderer != null)
         {
@@ -241,7 +217,7 @@ public class BossController : MonoBehaviour
 
         Debug.Log("Boss: Correndo!");
         isCharging = true;
-        isAttacking = false; // agora está "só" correndo
+        isAttacking = false;
 
         float chargeTimer = 0f;
         while (chargeTimer < chargeDuration && isCharging)
@@ -257,26 +233,41 @@ public class BossController : MonoBehaviour
             Debug.Log("Boss: Corrida finalizada por tempo!");
         }
 
-        // pequena pausa depois do dash
         yield return new WaitForSeconds(0.5f);
     }
 
+    // ================================
+    // DANO POR CONTATO (DASH DO BOSS)
+    // ================================
+    [SerializeField] private int contactDamageUnits = 2;
+    // ex: 2 unidades = 1 coração, se 1 unidade = meio coração no seu HeartsHealthUI
+
+    void DealContactDamage(GameObject other)
+    {
+        if (!isCharging) return;               // só causa dano durante o dash
+        if (!other.CompareTag("Player")) return;
+
+        // Mesmo esquema do BossKnife
+        HeartsHealthUI heartsUI = FindObjectOfType<HeartsHealthUI>();
+        if (heartsUI != null)
+        {
+            heartsUI.TakeDamage(contactDamageUnits);
+            Debug.Log($"Boss acertou o player no dash! Dano: {contactDamageUnits} unidade(s) de coração");
+        }
+        else
+        {
+            Debug.LogWarning("[BossController] HeartsHealthUI não encontrado na cena!");
+        }
+
+        StopCharge();
+    }
+
+    // Se o boss usar colliders NÃO-trigger
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if (isCharging && collision.gameObject.CompareTag("Player"))
+        if (isCharging)
         {
-            Health2D playerHealth = collision.gameObject.GetComponent<Health2D>();
-            if (playerHealth != null)
-            {
-                playerHealth.ApplyDamage(20f);
-                Debug.Log("Boss acertou o player na corrida!");
-            }
-            StopCharge();
-        }
-        else if (isCharging)
-        {
-            Debug.Log("Boss colidiu com: " + collision.gameObject.name);
-            StopCharge();
+            DealContactDamage(collision.gameObject);
         }
     }
 
@@ -284,9 +275,27 @@ public class BossController : MonoBehaviour
     {
         if (isCharging)
         {
-            StopCharge();
+            DealContactDamage(collision.gameObject);
         }
     }
+
+    // Se você tiver algum collider do boss como Trigger (hitbox extra, etc.)
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (isCharging)
+        {
+            DealContactDamage(other.gameObject);
+        }
+    }
+
+    void OnTriggerStay2D(Collider2D other)
+    {
+        if (isCharging)
+        {
+            DealContactDamage(other.gameObject);
+        }
+    }
+
 
     void StopCharge()
     {
@@ -314,7 +323,6 @@ public class BossController : MonoBehaviour
             Gizmos.DrawWireSphere(lineEnd, 0.3f);
         }
 
-        // Gizmo da órbita do firePoint
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, firePointOrbitRadius);
     }
