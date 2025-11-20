@@ -21,6 +21,10 @@ public class WeaponStation : MonoBehaviour
     public bool destroyAfterPurchase = true;  // Se true, some após comprar
     public bool canBuyMultipleTimes = false;  // Se true, pode comprar várias vezes
 
+    [Header("Audio (Opcional)")]
+    public AudioClip purchaseSuccessClip;  // Som de compra bem-sucedida
+    public AudioClip purchaseFailClip;     // Som de moedas insuficientes
+
     private bool playerInRange = false;
     private bool alreadyPurchased = false;
     private WeaponManager playerWeaponManager;
@@ -129,6 +133,12 @@ public class WeaponStation : MonoBehaviour
 
         if (scoreManager.CurrentCoins < price)
         {
+            // Toca som de erro
+            if (purchaseFailClip != null)
+            {
+                AudioSource.PlayClipAtPoint(purchaseFailClip, transform.position, 0.7f);
+            }
+
             // Moedas insuficientes
             if (messageText != null)
             {
@@ -141,6 +151,12 @@ public class WeaponStation : MonoBehaviour
         // Compra com sucesso!
         if (scoreManager.TrySpendCoins(price))
         {
+            // Toca som de sucesso
+            if (purchaseSuccessClip != null)
+            {
+                AudioSource.PlayClipAtPoint(purchaseSuccessClip, transform.position, 0.7f);
+            }
+
             // Equipa a arma
             playerWeaponManager.EquipWeapon(weaponType);
             
