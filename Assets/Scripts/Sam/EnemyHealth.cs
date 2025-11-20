@@ -161,7 +161,7 @@ public class EnemyHealth : MonoBehaviour
         var cols = GetComponentsInChildren<Collider2D>();
         foreach (var c in cols) c.enabled = false;
 
-        // INCREMENTO DO SCORE (sua mudan�a)
+        // INCREMENTO DO SCORE
         OnAnyEnemyDied?.Invoke(this);
 
         // aqui voc� pode tocar anima��o de morte, som, etc.
@@ -174,8 +174,32 @@ public class EnemyHealth : MonoBehaviour
         Despawn();
     }
 
-    void Despawn()
+    // Agora � PUBLIC pra podermos chamar de fora se quiser
+    public void Despawn()
     {
+        if (pool != null)
+        {
+            pool.ReturnObjectToPool(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    /// <summary>
+    /// For�a o inimigo a voltar para o pool SEM dar score e SEM anima de morte.
+    /// �til pra limpar zumbis de outras �reas quando come�a a boss fight.
+    /// </summary>
+    public void ForceDespawnWithoutScore()
+    {
+        // Bloqueia qualquer l�gica de morte/dano futura
+        dead = true;
+
+        // Cancela corrotinas de flash
+        StopAllCoroutines();
+
+        // Vai direto pro pool / destroy
         if (pool != null)
         {
             pool.ReturnObjectToPool(gameObject);
