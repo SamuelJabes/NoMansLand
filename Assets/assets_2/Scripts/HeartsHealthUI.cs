@@ -104,8 +104,23 @@ public class HeartsHealthUI : MonoBehaviour
     // Atualiza cada heartImage de acordo com currentUnits (0..maxUnits)
     void UpdateHeartsVisual()
     {
-        for (int i = 0; i < maxHearts; i++)
+        if (heartImages == null || heartImages.Count == 0)
         {
+            Debug.LogWarning("[HeartsHealthUI] heartImages está vazio! Arraste as 3 Images no Inspector.");
+            return;
+        }
+
+        // Usa o menor valor entre maxHearts e o tamanho real da lista
+        int heartsToUpdate = Mathf.Min(maxHearts, heartImages.Count);
+        
+        for (int i = 0; i < heartsToUpdate; i++)
+        {
+            if (heartImages[i] == null)
+            {
+                Debug.LogWarning($"[HeartsHealthUI] heartImages[{i}] está null! Verifique o Inspector.");
+                continue;
+            }
+
             // unidades correspondentes a este heart: possible values 0,1,2
             int heartUnits = Mathf.Clamp(currentUnits - i * 2, 0, 2);
             // heartUnits == 2 -> full | ==1 -> half | ==0 -> empty

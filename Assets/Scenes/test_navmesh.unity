@@ -361,7 +361,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 8669251620210040706, guid: 4adfbf7227971a74bb1ac7c2e4c45c96, type: 3}
+  m_Sprite: {fileID: 8677360721932010878, guid: a05d28beb4d12a04ca0af49f398b9e6b, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -515,7 +515,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 8669251620210040706, guid: 4adfbf7227971a74bb1ac7c2e4c45c96, type: 3}
+  m_Sprite: {fileID: 8677360721932010878, guid: a05d28beb4d12a04ca0af49f398b9e6b, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -588,15 +588,18 @@ MonoBehaviour:
   - {fileID: 517432640}
   - {fileID: 1167366438}
   - {fileID: 1385395288}
-  fullSprite: {fileID: 8669251620210040706, guid: 4adfbf7227971a74bb1ac7c2e4c45c96, type: 3}
-  halfSprite: {fileID: 4182410544016666133, guid: c19e0ba8e09a12342aca8acf477866d5, type: 3}
-  emptySprite: {fileID: -1031049354629045415, guid: b79eeb8ae5fc9d74986e589760328a7e, type: 3}
+  fullSprite: {fileID: 8677360721932010878, guid: a05d28beb4d12a04ca0af49f398b9e6b, type: 3}
+  halfSprite: {fileID: -193348711614450820, guid: dc24becd6baef224497fcc2433af6f2c, type: 3}
+  emptySprite: {fileID: 8113059378047358038, guid: 5e25735e39e401b40b6ed0bae7854cba, type: 3}
   maxHearts: 3
   currentUnits: 6
   flashDuration: 0.18
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   audioSource: {fileID: 0}
   hurtSfx: {fileID: 0}
+  gameOverScene: Main_menu
+  deathDelay: 1
+  deathSfx: {fileID: 0}
 --- !u!114 &1169891051
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -821,7 +824,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 8669251620210040706, guid: 4adfbf7227971a74bb1ac7c2e4c45c96, type: 3}
+  m_Sprite: {fileID: 8677360721932010878, guid: a05d28beb4d12a04ca0af49f398b9e6b, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
