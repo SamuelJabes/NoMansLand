@@ -9,20 +9,20 @@ public class ScoreManager : MonoBehaviour
     [Tooltip("Arraste aqui o TextMeshPro do placar (ex.: ScoreText).")]
     public TMP_Text scoreText;
 
-    [Tooltip("Prefixo que aparece antes do número.")]
+    [Tooltip("Prefixo que aparece antes do nï¿½mero.")]
     public string prefix = "Score: ";
 
-    [Tooltip("Quantos dígitos com zero à esquerda (ex.: 3 => 000, 001, 012).")]
-    public int minDigits = 3;   // 3 dígitos para o SCORE
+    [Tooltip("Quantos dï¿½gitos com zero ï¿½ esquerda (ex.: 3 => 000, 001, 012).")]
+    public int minDigits = 3;   // 3 dï¿½gitos para o SCORE
 
     [Header("Coin UI")]
     [Tooltip("Texto TMP que mostra a quantidade de moedas (ex.: CoinText).")]
     public TMP_Text coinText;
 
-    [Tooltip("Dígitos das coins (5 => 00000, 00001, 00123).")]
-    public int coinDigits = 5;  // 5 dígitos para COINS
+    [Tooltip("Dï¿½gitos das coins (5 => 00000, 00001, 00123).")]
+    public int coinDigits = 5;  // 5 dï¿½gitos para COINS
 
-    [Header("Conversão")]
+    [Header("Conversï¿½o")]
     [Tooltip("Quantas moedas ganha para cada 1 ponto de score.")]
     public int coinsPerScore = 10;   // 1 score => 10 coins
 
@@ -37,7 +37,10 @@ public class ScoreManager : MonoBehaviour
             return;
         }
         Instance = this;
-        // DontDestroyOnLoad(gameObject); // habilite se o placar deve persistir entre cenas
+
+        transform.SetParent(null); // desanexa de qualquer pai
+
+        DontDestroyOnLoad(gameObject); // habilite se o placar deve persistir entre cenas
 
         UpdateScoreUI();
         UpdateCoinUI();
@@ -55,7 +58,7 @@ public class ScoreManager : MonoBehaviour
 
     private void OnEnemyDied(EnemyHealth e)
     {
-        // Se o inimigo tiver um valor próprio de score, usa; senão soma 1
+        // Se o inimigo tiver um valor prï¿½prio de score, usa; senï¿½o soma 1
         AddScore(e ? e.scoreValue : 1);
     }
 
@@ -68,7 +71,7 @@ public class ScoreManager : MonoBehaviour
         score += amount;
         if (score < 0) score = 0;
 
-        // NOVO: conversão direta score -> coins (1 score => coinsPerScore moedas)
+        // NOVO: conversï¿½o direta score -> coins (1 score => coinsPerScore moedas)
         int coinsToAdd = amount * Mathf.Max(0, coinsPerScore);
         if (coinsToAdd > 0)
         {
@@ -77,7 +80,7 @@ public class ScoreManager : MonoBehaviour
 
         UpdateScoreUI();
 
-        // animação de "punch" no score, se existir
+        // animaï¿½ï¿½o de "punch" no score, se existir
         var punch = scoreText ? scoreText.GetComponent<ScoreTextPunch>() : null;
         if (punch) punch.Punch();
     }
