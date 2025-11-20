@@ -24,10 +24,25 @@ public class EnemySpawner2Types : MonoBehaviour
     [Tooltip("1 = sala 1, 2 = sala 2, 3 = sala 3.")]
     public int currentArea = 1;
 
-    [Header("Config de Spawn")]
-    public float spawnInterval = 2f;
+    [Header("Config de Spawn (por progresso)")]
+    [Tooltip("Intervalo de spawn enquanto só a área 1 está liberada.")]
+    public float spawnIntervalArea1 = 2f;
+
+    [Tooltip("Intervalo de spawn quando a área 2 foi liberada.")]
+    public float spawnIntervalArea2 = 1.5f;
+
+    [Tooltip("Intervalo de spawn quando a área 3 foi liberada.")]
+    public float spawnIntervalArea3 = 1.0f;
+
+    [Header("Chance de Zumbi Grande")]
     [Range(0f, 1f)]
     public float bigZombieChance = 0.3f;
+
+    [Header("Limite de Spawn")]
+    [Tooltip("Máximo de zombies spawnados por ciclo (evita esgotar o pool).")]
+    public int maxSpawnsPerCycle = 5;
+
+    [Header("NavMesh")]
     [Tooltip("Raio para projetar o spawn no NavMesh.")]
     public float navmeshSearchRadius = 3f;
 
@@ -58,9 +73,19 @@ public class EnemySpawner2Types : MonoBehaviour
     {
         while (true)
         {
-            SpawnOne();
-            yield return new WaitForSeconds(spawnInterval);
+            SpawnFromAllPoints();
+            yield return new WaitForSeconds(GetCurrentSpawnInterval());
         }
+    }
+
+    /// <summary>
+    /// Retorna o intervalo de spawn atual baseado nas áreas desbloqueadas.
+    /// </summary>
+    float GetCurrentSpawnInterval()
+    {
+        if (area3Unlocked) return spawnIntervalArea3;
+        if (area2Unlocked) return spawnIntervalArea2;
+        return spawnIntervalArea1;
     }
 
     /// <summary>
@@ -74,70 +99,86 @@ public class EnemySpawner2Types : MonoBehaviour
             case 2: area2Unlocked = true; break;
             case 3: area3Unlocked = true; break;
         }
+
+        Debug.Log($"[EnemySpawner2Types] Área {areaIndex} desbloqueada!");
     }
 
     /// <summary>
-    /// Chamado por um trigger de área (ou se você quiser na porta) para indicar
-    /// em qual sala o player está.
+    /// Chamado por um trigger de área para indicar em qual sala o player está.
     /// </summary>
     public void SetCurrentArea(int areaIndex)
     {
         currentArea = Mathf.Clamp(areaIndex, 1, 3);
+        Debug.Log($"[EnemySpawner2Types] Player agora está na área {currentArea}");
     }
 
-    void SpawnOne()
+    /// <summary>
+    /// Spawna zombies em spawn points offscreen da área atual (limitado por maxSpawnsPerCycle).
+    /// </summary>
+    void SpawnFromAllPoints()
     {
-        // pega apenas spawnPoints da ÁREA ATUAL, DESBLOQUEADA e FORA da câmera
         var offscreenPoints = GetOffscreenPointsFromCurrentArea();
         if (offscreenPoints.Count == 0)
             return;
 
-        // escolhe o pool (grande ou pequeno)
-        ObjectPool chosenPool = null;
-        float r = Random.value;
-        if (bigZombiePool != null && r < bigZombieChance)
-            chosenPool = bigZombiePool;
-        else
-            chosenPool = smallZombiePool;
+        // Embaralha e limita quantidade
+        Shuffle(offscreenPoints);
+        int spawnCount = Mathf.Min(offscreenPoints.Count, maxSpawnsPerCycle);
 
-        if (chosenPool == null)
+        for (int idx = 0; idx < spawnCount; idx++)
         {
-            Debug.LogWarning("[EnemySpawner2Types] Nenhum pool válido configurado.");
-            return;
-        }
+            var sp = offscreenPoints[idx];
+            if (sp == null) continue;
 
-        GameObject enemy = chosenPool.RequestObjectFromPool();
-        if (enemy == null) return;
+            // Escolhe o pool (grande ou pequeno) pra ESTE spawn
+            ObjectPool chosenPool = null;
+            float r = Random.value;
+            if (bigZombiePool != null && r < bigZombieChance)
+                chosenPool = bigZombiePool;
+            else
+                chosenPool = smallZombiePool;
 
-        var agent = enemy.GetComponent<NavMeshAgent>();
-        var enemyAI = enemy.GetComponent<Enemy>();
-
-        // escolhe um spawnPoint aleatório (fora da câmera)
-        Transform sp = offscreenPoints[Random.Range(0, offscreenPoints.Count)];
-        Vector3 desiredPos = sp.position;
-
-        // projeta para o NavMesh
-        NavMeshHit hit;
-        if (NavMesh.SamplePosition(desiredPos, out hit, navmeshSearchRadius, NavMesh.AllAreas))
-        {
-            Vector3 navmeshPos = hit.position;
-
-            enemy.transform.position = navmeshPos;
-
-            if (agent != null)
+            if (chosenPool == null)
             {
-                agent.Warp(navmeshPos);
+                Debug.LogWarning("[EnemySpawner2Types] Nenhum pool válido configurado.");
+                continue;
             }
 
-            if (enemyAI != null && target != null)
+            GameObject enemy = chosenPool.RequestObjectFromPool();
+            if (enemy == null)
             {
-                enemyAI.SetTarget(target);
+                // pool acabou, cancela este spawn
+                continue;
             }
-        }
-        else
-        {
-            // se não encontrar NavMesh perto, devolve pro pool
-            chosenPool.ReturnObjectToPool(enemy);
+
+
+            var agent = enemy.GetComponent<NavMeshAgent>();
+            var enemyAI = enemy.GetComponent<Enemy>();
+
+            Vector3 desiredPos = sp.position;
+
+            NavMeshHit hit;
+            if (NavMesh.SamplePosition(desiredPos, out hit, navmeshSearchRadius, NavMesh.AllAreas))
+            {
+                Vector3 navmeshPos = hit.position;
+
+                enemy.transform.position = navmeshPos;
+
+                if (agent != null)
+                {
+                    agent.Warp(navmeshPos);
+                }
+
+                if (enemyAI != null && target != null)
+                {
+                    enemyAI.SetTarget(target);
+                }
+            }
+            else
+            {
+                // Se não encontrar NavMesh perto, devolve pro pool
+                chosenPool.ReturnObjectToPool(enemy);
+            }
         }
     }
 
@@ -147,7 +188,6 @@ public class EnemySpawner2Types : MonoBehaviour
         if (mainCam == null) mainCam = Camera.main;
         if (mainCam == null) return result;
 
-        // limites da câmera em world space
         Vector3 min = mainCam.ViewportToWorldPoint(new Vector3(0f, 0f, 0f));
         Vector3 max = mainCam.ViewportToWorldPoint(new Vector3(1f, 1f, 0f));
 
@@ -193,5 +233,19 @@ public class EnemySpawner2Types : MonoBehaviour
         }
 
         return result;
+    }
+
+    /// <summary>
+    /// Embaralha uma lista usando Fisher-Yates shuffle.
+    /// </summary>
+    void Shuffle<T>(List<T> list)
+    {
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            T temp = list[i];
+            list[i] = list[j];
+            list[j] = temp;
+        }
     }
 }

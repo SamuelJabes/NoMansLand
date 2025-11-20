@@ -31,7 +31,8 @@ public class EnemyHealth : MonoBehaviour
 
     void Awake()
     {
-        renderers = GetComponentsInChildren<SpriteRenderer>(includeInactive: false);
+        // CRÍTICO: includeInactive=true para funcionar com pooling
+        renderers = GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
 
         baseColors = new Color[renderers.Length];
         baseMaterials = new Material[renderers.Length];
@@ -54,7 +55,18 @@ public class EnemyHealth : MonoBehaviour
 
         // reativa sprites e força alpha 1
         if (renderers == null || renderers.Length == 0)
+        {
             renderers = GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
+
+            // CRÍTICO: recria arrays se necessário para evitar sprites invisíveis
+            baseColors = new Color[renderers.Length];
+            baseMaterials = new Material[renderers.Length];
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                baseColors[i] = renderers[i].color;
+                baseMaterials[i] = renderers[i].sharedMaterial;
+            }
+        }
 
         for (int i = 0; i < renderers.Length; i++)
         {
@@ -71,6 +83,8 @@ public class EnemyHealth : MonoBehaviour
 
         // reseta visuais (materiais)
         RestoreVisuals();
+
+        Debug.Log($"[EnemyHealth] {gameObject.name} reativado do pool com {renderers.Length} sprites");
     }
 
     // ======================
@@ -161,7 +175,7 @@ public class EnemyHealth : MonoBehaviour
         var cols = GetComponentsInChildren<Collider2D>();
         foreach (var c in cols) c.enabled = false;
 
-        // INCREMENTO DO SCORE (sua mudança)
+        // INCREMENTO DO SCORE
         OnAnyEnemyDied?.Invoke(this);
 
         // aqui você pode tocar animação de morte, som, etc.
@@ -174,8 +188,32 @@ public class EnemyHealth : MonoBehaviour
         Despawn();
     }
 
-    void Despawn()
+    // Agora é PUBLIC pra podermos chamar de fora se quiser
+    public void Despawn()
     {
+        if (pool != null)
+        {
+            pool.ReturnObjectToPool(gameObject);
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+
+    /// <summary>
+    /// Força o inimigo a voltar para o pool SEM dar score e SEM anima de morte.
+    /// Útil pra limpar zumbis de outras áreas quando começa a boss fight.
+    /// </summary>
+    public void ForceDespawnWithoutScore()
+    {
+        // Bloqueia qualquer lógica de morte/dano futura
+        dead = true;
+
+        // Cancela corrotinas de flash
+        StopAllCoroutines();
+
+        // Vai direto pro pool / destroy
         if (pool != null)
         {
             pool.ReturnObjectToPool(gameObject);
@@ -196,5 +234,11 @@ public class EnemyHealth : MonoBehaviour
             renderers[i].color = baseColors[i];
             renderers[i].sharedMaterial = baseMaterials[i];
         }
+    }
+
+    // Método público para verificar se o inimigo está morto
+    public bool IsDead()
+    {
+        return dead;
     }
 }
