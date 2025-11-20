@@ -264,8 +264,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1acc0936fa9c784491627d73e373c53, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 5
+  maxHealth: 4
   pool: {fileID: 0}
+  scoreValue: 1
   useMaterialSwap: 1
   flashMaterial: {fileID: 2100000, guid: ca94eebd2d926e24fa8ae829dcfe4563, type: 2}
   flashColor: {r: 1, g: 1, b: 1, a: 1}

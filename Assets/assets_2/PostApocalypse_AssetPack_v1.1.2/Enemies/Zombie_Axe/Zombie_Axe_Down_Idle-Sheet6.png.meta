@@ -46,7 +46,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 1
+    filterMode: 0
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -60,7 +60,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 16
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -84,7 +84,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 0
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -140,7 +140,7 @@ TextureImporter:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 27
+        width: 13
         height: 18
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -160,9 +160,9 @@ TextureImporter:
       name: Zombie_Axe_Down_Idle-Sheet6_1
       rect:
         serializedVersion: 2
-        x: 26
+        x: 13
         y: 0
-        width: 14
+        width: 13
         height: 18
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -182,9 +182,9 @@ TextureImporter:
       name: Zombie_Axe_Down_Idle-Sheet6_2
       rect:
         serializedVersion: 2
-        x: 39
+        x: 26
         y: 0
-        width: 14
+        width: 13
         height: 18
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -204,9 +204,9 @@ TextureImporter:
       name: Zombie_Axe_Down_Idle-Sheet6_3
       rect:
         serializedVersion: 2
-        x: 51
+        x: 39
         y: 0
-        width: 27
+        width: 13
         height: 18
       alignment: 0
       pivot: {x: 0, y: 0}
@@ -222,11 +222,55 @@ TextureImporter:
       indices: 
       edges: []
       weights: []
+    - serializedVersion: 2
+      name: Zombie_Axe_Down_Idle-Sheet6_4
+      rect:
+        serializedVersion: 2
+        x: 52
+        y: 0
+        width: 13
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 9b0b1279fddc37b418650f53d62556ae
+      internalID: -1862401478
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Zombie_Axe_Down_Idle-Sheet6_5
+      rect:
+        serializedVersion: 2
+        x: 65
+        y: 0
+        width: 13
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: c5a934b474da4bf4b914fbb3fc0ff5ae
+      internalID: -1145991509
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
     outline: []
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: e6b40c37b622f6645a56ddff85e59198
     internalID: 0
     vertices: []
     indices: 
@@ -240,6 +284,8 @@ TextureImporter:
       Zombie_Axe_Down_Idle-Sheet6_1: 3426852494308517874
       Zombie_Axe_Down_Idle-Sheet6_2: -2496552203368723902
       Zombie_Axe_Down_Idle-Sheet6_3: -6723130302774262614
+      Zombie_Axe_Down_Idle-Sheet6_4: -1862401478
+      Zombie_Axe_Down_Idle-Sheet6_5: -1145991509
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
