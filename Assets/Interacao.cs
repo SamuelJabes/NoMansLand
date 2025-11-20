@@ -13,7 +13,7 @@ public class Interacao : MonoBehaviour
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        // Esconde o texto e botão no início
+        // Esconde o texto e botão no início 
         messageText.gameObject.SetActive(false);
         buyButton.SetActive(false);  
     }
