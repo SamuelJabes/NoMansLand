@@ -53,11 +53,19 @@ public class BossKnife : MonoBehaviour
         // Se acertar o player
         if (other.CompareTag("Player"))
         {
-            Health2D playerHealth = other.GetComponent<Health2D>();
-            if (playerHealth != null)
+            // Busca o sistema de corações (igual aos zombies)
+            HeartsHealthUI heartsUI = FindObjectOfType<HeartsHealthUI>();
+            if (heartsUI != null)
             {
-                playerHealth.ApplyDamage(damage);
-                Debug.Log("Faca do Boss acertou o player!");
+                // Converte damage (10) para unidades de coração
+                // 10 damage = 1 unidade = meio coração
+                int heartUnits = Mathf.CeilToInt(damage / 10f);
+                heartsUI.TakeDamage(heartUnits);
+                Debug.Log($"Faca do Boss acertou! Dano: {heartUnits} unidade(s) de coração");
+            }
+            else
+            {
+                Debug.LogWarning("[BossKnife] HeartsHealthUI não encontrado na cena!");
             }
         }
 
