@@ -1,29 +1,27 @@
 using System.Collections;
-using System;
 using UnityEngine;
+using UnityEngine.SceneManagement; // <- IMPORTANTE pra trocar de cena
 
-public class EnemyHealth : MonoBehaviour
+public class BossHealth : MonoBehaviour
 {
     [Header("Vida")]
-    public int maxHealth = 5;
+    public int maxHealth = 50;
     int currentHealth;
     bool dead;
 
-    [Header("Pooling")]
-    [Tooltip("Pool ao qual este inimigo pertence (ï¿½ setado automaticamente pelo ObjectPool).")]
-    public ObjectPool pool;
-
-    [Header("Score")]
-    public int scoreValue = 1;
-    public static event Action<EnemyHealth> OnAnyEnemyDied;
-
-    [Header("Feedback de Dano (Escolha 1)")]
+    [Header("Feedback de Dano (Material Swap)")]
     public bool useMaterialSwap = false;
     public Material flashMaterial;
 
-    [Header("Feedback via Tint (Escolha 2)")]
+    [Header("Feedback via Tint (Cor)")]
     public Color flashColor = new Color(1f, 0.95f, 0.8f);
     public float flashDuration = 0.08f;
+
+    [Header("Cena ao morrer")]
+    [Tooltip("Nome da cena de final (precisa estar no Build Settings).")]
+    public string endSceneName = "End";
+    [Tooltip("Delay antes de carregar a cena (pra dar tempo de animação, som, etc).")]
+    public float sceneChangeDelay = 2f;
 
     SpriteRenderer[] renderers;
     Color[] baseColors;
@@ -31,8 +29,7 @@ public class EnemyHealth : MonoBehaviour
 
     void Awake()
     {
-        // CRï¿½TICO: includeInactive=true para funcionar com pooling
-        renderers = GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
+        renderers = GetComponentsInChildren<SpriteRenderer>(includeInactive: false);
 
         baseColors = new Color[renderers.Length];
         baseMaterials = new Material[renderers.Length];
@@ -41,11 +38,12 @@ public class EnemyHealth : MonoBehaviour
             baseColors[i] = renderers[i].color;
             baseMaterials[i] = renderers[i].sharedMaterial;
         }
+
+        currentHealth = maxHealth;
     }
 
     void OnEnable()
     {
-        // reset estado quando volta do pool
         dead = false;
         currentHealth = maxHealth;
 
@@ -53,20 +51,9 @@ public class EnemyHealth : MonoBehaviour
         var cols = GetComponentsInChildren<Collider2D>(includeInactive: true);
         foreach (var c in cols) c.enabled = true;
 
-        // reativa sprites e forï¿½a alpha 1
+        // reativa sprites / cores
         if (renderers == null || renderers.Length == 0)
-        {
             renderers = GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
-
-            // CRï¿½TICO: recria arrays se necessï¿½rio para evitar sprites invisï¿½veis
-            baseColors = new Color[renderers.Length];
-            baseMaterials = new Material[renderers.Length];
-            for (int i = 0; i < renderers.Length; i++)
-            {
-                baseColors[i] = renderers[i].color;
-                baseMaterials[i] = renderers[i].sharedMaterial;
-            }
-        }
 
         for (int i = 0; i < renderers.Length; i++)
         {
@@ -74,45 +61,36 @@ public class EnemyHealth : MonoBehaviour
             if (!r) continue;
 
             r.enabled = true;
-
-            // garante que nï¿½o ficou transparente
             var col = baseColors != null && baseColors.Length > i ? baseColors[i] : Color.white;
             col.a = 1f;
             r.color = col;
         }
 
-        // reseta visuais (materiais)
         RestoreVisuals();
-
-        Debug.Log($"[EnemyHealth] {gameObject.name} reativado do pool com {renderers.Length} sprites");
     }
 
-    // ======================
-    // AQUI O DANO ACONTECE
-    // ======================
+    // ====== DANO ENTRANDO PELO COLIDER (BULLET / SHOTGUN) ======
     void OnTriggerEnter2D(Collider2D other)
     {
         int dmg = 0;
 
-        // Bala normal
         Bullet bullet = other.GetComponent<Bullet>();
         if (bullet != null)
         {
             dmg = bullet.damage;
-            Destroy(bullet.gameObject); // some com a bala
+            Destroy(bullet.gameObject);
         }
         else
         {
-            // Pellet de shotgun
             ShotgunPellet pellet = other.GetComponent<ShotgunPellet>();
             if (pellet != null)
             {
                 dmg = pellet.damage;
-                Destroy(pellet.gameObject); // some com o pellet
+                Destroy(pellet.gameObject);
             }
         }
 
-        if (dmg <= 0) return; // nï¿½o era projï¿½til
+        if (dmg <= 0) return;
 
         TakeDamage(dmg);
     }
@@ -128,7 +106,7 @@ public class EnemyHealth : MonoBehaviour
 
         if (currentHealth <= 0)
         {
-            dead = true; // CRï¿½TICO: marca como morto IMEDIATAMENTE antes de chamar Die()
+            dead = true;
             Die();
         }
     }
@@ -171,56 +149,27 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
-        // desativa colisores pra nï¿½o tomar mais tiro / bater em nada
+        // desativa colisores
         var cols = GetComponentsInChildren<Collider2D>();
         foreach (var c in cols) c.enabled = false;
 
-        // INCREMENTO DO SCORE
-        OnAnyEnemyDied?.Invoke(this);
+        // aqui você pode tocar animação / som de morte
+        // ex: GetComponent<Animator>()?.SetTrigger("Die");
 
-        // aqui vocï¿½ pode tocar animaï¿½ï¿½o de morte, som, etc.
-        StartCoroutine(DespawnAfterDelay(0.1f));
+        StartCoroutine(LoadEndSceneAfterDelay());
     }
 
-    IEnumerator DespawnAfterDelay(float delay)
+    IEnumerator LoadEndSceneAfterDelay()
     {
-        yield return new WaitForSeconds(delay);
-        Despawn();
-    }
+        yield return new WaitForSeconds(sceneChangeDelay);
 
-    // Agora ï¿½ PUBLIC pra podermos chamar de fora se quiser
-    public void Despawn()
-    {
-        if (pool != null)
+        if (!string.IsNullOrEmpty(endSceneName))
         {
-            pool.ReturnObjectToPool(gameObject);
+            SceneManager.LoadScene(endSceneName);
         }
         else
         {
-            Destroy(gameObject);
-        }
-    }
-
-    /// <summary>
-    /// Forï¿½a o inimigo a voltar para o pool SEM dar score e SEM anima de morte.
-    /// ï¿½til pra limpar zumbis de outras ï¿½reas quando comeï¿½a a boss fight.
-    /// </summary>
-    public void ForceDespawnWithoutScore()
-    {
-        // Bloqueia qualquer lï¿½gica de morte/dano futura
-        dead = true;
-
-        // Cancela corrotinas de flash
-        StopAllCoroutines();
-
-        // Vai direto pro pool / destroy
-        if (pool != null)
-        {
-            pool.ReturnObjectToPool(gameObject);
-        }
-        else
-        {
-            Destroy(gameObject);
+            Debug.LogError("[BossHealth] endSceneName não configurado!");
         }
     }
 
@@ -234,11 +183,5 @@ public class EnemyHealth : MonoBehaviour
             renderers[i].color = baseColors[i];
             renderers[i].sharedMaterial = baseMaterials[i];
         }
-    }
-
-    // Mï¿½todo pï¿½blico para verificar se o inimigo estï¿½ morto
-    public bool IsDead()
-    {
-        return dead;
     }
 }

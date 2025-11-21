@@ -98,8 +98,9 @@ public class WeaponStation : MonoBehaviour
         }
 
         // Mostra mensagem de compra
-        string weaponName = weaponType == WeaponType.MG ? "MG" : "Pistola";
-        messageText.text = $"[E] Comprar\n<size=120%>{price} Moedas</size>";
+        string weaponName = weaponType == WeaponType.MG ? "MG" : 
+                            weaponType == WeaponType.Shotgun ? "Shotgun" : "Pistola";
+        messageText.text = $"[E] Comprar {weaponName}\n<size=120%>{price} Moedas</size>";
         interactionUI.SetActive(true);
 
         // Highlight visual
@@ -165,7 +166,8 @@ public class WeaponStation : MonoBehaviour
             // Feedback visual
             if (messageText != null)
             {
-                string weaponName = weaponType == WeaponType.MG ? "AK-47" : "Pistola";
+                string weaponName = weaponType == WeaponType.MG ? "AK-47" : 
+                                    weaponType == WeaponType.Shotgun ? "Shotgun" : "Pistola";
                 messageText.text = $"<color=green>{weaponName}\nAdquirida!</color>";
             }
 

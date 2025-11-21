@@ -7,14 +7,14 @@ public class ShootSG : MonoBehaviour
     public GameObject bullet;
     public Transform muzzle;                      // opcional
     [Min(0.15f)] public float fireRate = 0.7f;    // tempo entre disparos de cartucho
-    [Min(1)] public int pellets = 7;              // quantos projéteis por tiro
+    [Min(1)] public int pellets = 7;              // quantos projï¿½teis por tiro
     [Range(0f, 45f)] public float coneDegrees = 12f; // abertura total do cone (graus)
 
-    [Header("Repetição")]
-    [Tooltip("Se true, permite segurar para disparos repetidos respeitando o fireRate. Se false, apenas clique único.")]
+    [Header("Repeticao")]
+    [Tooltip("Se true, permite segurar para disparos repetidos respeitando o fireRate. Se false, apenas clique unico.")]
     public bool allowHoldToFire = false;
 
-    [Header("Áudio")]
+    [Header("Audio")]
     [Range(0f, 1f)] public float volume = 1f;
     [Range(0f, 0.5f)] public float pitchVariance = 0.04f;
 
@@ -40,13 +40,13 @@ public class ShootSG : MonoBehaviour
     void FireShot()
     {
         Transform origin = muzzle ? muzzle : transform;
-
         float baseZ = origin.rotation.eulerAngles.z;
 
-        // Distribui pellets no cone. Aqui: random uniforme dentro do cone.
-        for (int i = 0; i < pellets; i++)
+        // 3 pellets fixos: centro, diagonal cima (+15Â°), diagonal baixo (-15Â°)
+        float[] angles = { 0f, 15f, -15f };
+
+        foreach (float offset in angles)
         {
-            float offset = (coneDegrees <= 0f) ? 0f : Random.Range(-coneDegrees * 0.5f, coneDegrees * 0.5f);
             Quaternion rot = Quaternion.Euler(0f, 0f, baseZ + offset);
             Instantiate(bullet, origin.position, rot);
         }
