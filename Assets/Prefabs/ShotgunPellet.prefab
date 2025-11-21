@@ -106,7 +106,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 10
-  damage: 1
+  damage: 3
   lifeTime: 2.5
 --- !u!50 &5677946911802193612
 Rigidbody2D:
@@ -196,7 +196,7 @@ MonoBehaviour:
   speed: 8
   maxRange: 5
   lifeTimeSafety: 1.2
-  damage: 1
+  damage: 2
 --- !u!82 &-5397101752548846514
 AudioSource:
   m_ObjectHideFlags: 0
