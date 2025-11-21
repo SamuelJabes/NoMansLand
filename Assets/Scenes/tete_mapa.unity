@@ -3971,7 +3971,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefab: {fileID: 2178860380743353497, guid: 4316950463223ac4c827302740a9ddec, type: 3}
-  poolSize: 50
+  poolSize: 25
 --- !u!4 &35363770
 Transform:
   m_ObjectHideFlags: 0
@@ -57204,7 +57204,7 @@ Transform:
   m_GameObject: {fileID: 387807153}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.09, y: -7.76, z: 0.027445571}
+  m_LocalPosition: {x: 59.4, y: 18.8, z: 0.027445571}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -58332,6 +58332,7 @@ GameObject:
   - component: {fileID: 397774947}
   - component: {fileID: 397774946}
   - component: {fileID: 397774943}
+  - component: {fileID: 397774948}
   m_Layer: 13
   m_Name: trigger_unlock_3
   m_TagString: Untagged
@@ -58447,6 +58448,27 @@ MonoBehaviour:
   backWallCollider: {fileID: 1768221272}
   bossAreaCollider: {fileID: 290750334}
   onlyOnce: 1
+  bossPrefab: {fileID: 0}
+  bossInstance: {fileID: 1113884753}
+  bossSpawnPoint: {fileID: 1113884762}
+  despawnEnemiesOutsideArena: 1
+--- !u!114 &397774948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 397774942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 25ebaeac264c82d4fbe8e99d67361bd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  clip: {fileID: 0}
+  volume: 0.8
+  playOnlyOnce: 0
+  minDelayBetweenPlays: 1
+  audioSourceOverride: {fileID: 0}
 --- !u!1 &398079491
 GameObject:
   m_ObjectHideFlags: 0
@@ -73250,6 +73272,7 @@ MonoBehaviour:
   spawnIntervalArea2: 2
   spawnIntervalArea3: 1
   bigZombieChance: 0.183
+  maxSpawnsPerCycle: 5
   navmeshSearchRadius: 3
   offscreenMargin: 1
   target: {fileID: 0}
@@ -155510,7 +155533,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1113884754
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -155603,11 +155626,11 @@ MonoBehaviour:
   knivesPerAttack: 7
   timeBetweenKnives: 0.6
   knifeSpeed: 8
-  chargeSpeed: 12
-  chargeDuration: 5
-  chargePreparationTime: 0.5
+  chargeSpeed: 16
+  chargeDuration: 3
+  chargePreparationTime: 1.2
   predictionCharge: 1
-  predictionMultiplier: 0.2
+  predictionMultiplier: 0.5
   normalSpeed: 3
   stoppingDistance: 0.5
   contactDamageUnits: 2
@@ -155642,7 +155665,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 100
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 0
@@ -155721,7 +155744,7 @@ Transform:
   m_GameObject: {fileID: 1113884753}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 99.84, y: 20.93, z: 0}
+  m_LocalPosition: {x: 115.67, y: 18.87, z: 0}
   m_LocalScale: {x: 2.7508063, y: 2.7508063, z: 2.200645}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -380310,7 +380333,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefab: {fileID: 7282916907489001899, guid: 113219b5637677a4a9a6b4a4571440f9, type: 3}
-  poolSize: 50
+  poolSize: 25
 --- !u!4 &2025228505
 Transform:
   m_ObjectHideFlags: 0

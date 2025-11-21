@@ -20,22 +20,38 @@ public class BossController : MonoBehaviour
     [SerializeField] private float timeBetweenKnives = 0.3f; // Tempo entre cada faca
     [SerializeField] private float knifeSpeed = 8f;
 
-    [Header("Ataque: Corrida")]
-    [SerializeField] private float chargeSpeed = 15f;             // Velocidade da corrida
-    [SerializeField] private float chargeDuration = 2.5f;         // Duração da corrida
-    [SerializeField] private float chargePreparationTime = 0.3f;  // Tempo de preparação antes de correr
+    [Header("Ataque: Corrida (Dash)")]
+    [SerializeField] private float chargeSpeed = 14f;             // Velocidade da corrida
+    [SerializeField] private float chargeDuration = 1.0f;         // TEMPO MÁXIMO de dash (só segurança)
+    [SerializeField] private float chargePreparationTime = 0.35f; // Tempo "carregando" (vermelho)
     [SerializeField] private bool predictionCharge = true;        // Prevê onde o player vai estar
-    [SerializeField] private float predictionMultiplier = 0.5f;   // Quanto prevê o movimento
+    [SerializeField] private float predictionMultiplier = 0.25f;  // Quanto prevê o movimento
+
+    [Header("Distâncias do Dash")]
+    [Tooltip("Distância mínima para o boss decidir dar dash. Não dasha se estiver colado.")]
+    [SerializeField] private float minChargeDistance = 3f;
+
+    [Tooltip("Distância máxima que ele tenta percorrer com o dash.")]
+    [SerializeField] private float maxChargeDistance = 8f;
+
+    [Tooltip("Quanto ele tenta passar um pouco além da posição alvo (para atravessar o player).")]
+    [SerializeField] private float chargeOvershoot = 1.0f;
 
     [Header("Movimento Normal")]
-    [SerializeField] private float normalSpeed = 3f;        // Velocidade normal de perseguição
-    [SerializeField] private float stoppingDistance = 5f;   // Distância mínima do player
+    [SerializeField] private float normalSpeed = 3f;      // Velocidade normal de perseguição
+    [SerializeField] private float stoppingDistance = 5f; // Distância mínima do player
+
+    [Header("Dano por contato no Dash")]
+    [SerializeField] private int contactDamageUnits = 2;
+    // ex: 2 unidades = 1 coração, se 1 unidade = meio coração
 
     private Rigidbody2D rb;
     private bool isAttacking = false;
     private bool isCharging = false;
     private bool isPreparingCharge = false;
     private Vector2 chargeDirection;
+    private float currentDashDistance;
+
     private SpriteRenderer spriteRenderer;
     private Color originalColor;
 
@@ -78,15 +94,14 @@ public class BossController : MonoBehaviour
 
         float distanceToPlayer = Vector2.Distance(transform.position, player.position);
 
-        // Se está correndo no dash
+        // Se está correndo no dash → movimento só do dash
         if (isCharging)
         {
-            // AGORA: sem raycast bloqueando, só corre
             rb.linearVelocity = chargeDirection * chargeSpeed;
             return;
         }
 
-        // Se está em qualquer ataque (facas ou pré/pós dash) -> fica parado
+        // Se está em ataque (lançando facas ou preparando dash) → fica parado
         if (isAttacking)
         {
             StopCompletely();
@@ -181,26 +196,22 @@ public class BossController : MonoBehaviour
 
     IEnumerator ChargeAttack()
     {
+        if (player == null) yield break;
+
+        float initialDistance = Vector2.Distance(transform.position, player.position);
+
+        // Se está muito perto, não compensa dar dash → volta pro ciclo
+        if (initialDistance < minChargeDistance)
+        {
+            yield break;
+        }
+
         isAttacking = true;
         Debug.Log("Boss: Preparando corrida!");
 
         StopCompletely();
 
-        Vector2 targetPosition = player.position;
-
-        if (predictionCharge)
-        {
-            Rigidbody2D playerRb = player.GetComponent<Rigidbody2D>();
-            if (playerRb != null)
-            {
-                Vector2 playerVelocity = playerRb.linearVelocity;
-                targetPosition = (Vector2)player.position + (playerVelocity * predictionMultiplier);
-                Debug.Log("Boss: Prevendo posição do player!");
-            }
-        }
-
-        chargeDirection = (targetPosition - (Vector2)transform.position).normalized;
-
+        // --- Fase de preparação (fica vermelho, "carregando") ---
         isPreparingCharge = true;
         if (spriteRenderer != null)
         {
@@ -215,39 +226,79 @@ public class BossController : MonoBehaviour
             spriteRenderer.color = originalColor;
         }
 
-        Debug.Log("Boss: Correndo!");
-        isCharging = true;
-        isAttacking = false;
+        // --- Calcula direção e distância do dash DEPOIS da preparação ---
+        Vector2 bossPos = transform.position;
+        Vector2 targetPosition = player.position;
 
-        float chargeTimer = 0f;
-        while (chargeTimer < chargeDuration && isCharging)
+        if (predictionCharge)
         {
-            chargeTimer += Time.deltaTime;
+            Rigidbody2D playerRb = player.GetComponent<Rigidbody2D>();
+            if (playerRb != null)
+            {
+                Vector2 playerVelocity = playerRb.linearVelocity;
+                targetPosition = (Vector2)player.position + (playerVelocity * predictionMultiplier);
+            }
+        }
+
+        Vector2 dir = (targetPosition - bossPos);
+
+        // Se por algum motivo ele acabou vindo muito perto, cancela
+        float distanceNow = dir.magnitude;
+        if (distanceNow < 0.5f)
+        {
+            isAttacking = false;
+            yield break;
+        }
+
+        dir.Normalize();
+        chargeDirection = dir;
+
+        // Distância alvo do dash (clampada)
+        float desiredDistance = distanceNow + chargeOvershoot;
+        currentDashDistance = Mathf.Clamp(desiredDistance, minChargeDistance, maxChargeDistance);
+
+        Debug.Log($"Boss: Correndo! Distância alvo ~ {currentDashDistance:F2}");
+
+        // --- Fase de dash ---
+        isCharging = true;
+        isAttacking = false; // agora ele está "só dashing"
+
+        Vector2 startPos = transform.position;
+        float elapsed = 0f;
+
+        while (isCharging && elapsed < chargeDuration)
+        {
+            elapsed += Time.deltaTime;
+
+            float traveled = Vector2.Distance(startPos, transform.position);
+            if (traveled >= currentDashDistance)
+            {
+                // alcançou a distância planejada
+                break;
+            }
+
             yield return null;
         }
 
+        // Se ainda estava dashing, força parar
         if (isCharging)
         {
-            isCharging = false;
-            StopCompletely();
-            Debug.Log("Boss: Corrida finalizada por tempo!");
+            StopCharge();
+            Debug.Log("Boss: Corrida finalizada (distância/tempo).");
         }
 
+        // Pequena pausa pós dash
         yield return new WaitForSeconds(0.5f);
     }
 
     // ================================
     // DANO POR CONTATO (DASH DO BOSS)
     // ================================
-    [SerializeField] private int contactDamageUnits = 2;
-    // ex: 2 unidades = 1 coração, se 1 unidade = meio coração no seu HeartsHealthUI
-
     void DealContactDamage(GameObject other)
     {
         if (!isCharging) return;               // só causa dano durante o dash
         if (!other.CompareTag("Player")) return;
 
-        // Mesmo esquema do BossKnife
         HeartsHealthUI heartsUI = FindObjectOfType<HeartsHealthUI>();
         if (heartsUI != null)
         {
@@ -279,7 +330,7 @@ public class BossController : MonoBehaviour
         }
     }
 
-    // Se você tiver algum collider do boss como Trigger (hitbox extra, etc.)
+    // Caso haja hitboxes em trigger
     void OnTriggerEnter2D(Collider2D other)
     {
         if (isCharging)
@@ -296,7 +347,6 @@ public class BossController : MonoBehaviour
         }
     }
 
-
     void StopCharge()
     {
         if (!isCharging) return;
@@ -304,7 +354,7 @@ public class BossController : MonoBehaviour
         isCharging = false;
         StopCompletely();
 
-        Debug.Log("Boss parou a corrida por colisão!");
+        Debug.Log("Boss parou a corrida.");
     }
 
     void OnDrawGizmosSelected()

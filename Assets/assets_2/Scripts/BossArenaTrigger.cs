@@ -1,79 +1,111 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
-[RequireComponent(typeof(Collider2D))]
 public class BossArenaTrigger : MonoBehaviour
 {
-    [Header("Parede invisível que bloqueia o retorno")]
-    [Tooltip("Collider da parede invisível entre Área 2 e Área 3 (normalmente um BoxCollider2D, NÃO trigger).")]
+    [Header("Referências de Arena")]
+    [Tooltip("Parede invisível que impede voltar para a área 2 (BoxCollider2D, NÃO trigger).")]
     public Collider2D backWallCollider;
 
-    [Header("Colisor que define a Área 3 (boss arena)")]
-    [Tooltip("Um Collider2D (geralmente BoxCollider2D) que cobre TODA a arena do boss.")]
+    [Tooltip("Collider 2D que representa TODA a área da arena do boss (deve ser trigger).")]
     public Collider2D bossAreaCollider;
 
-    [Header("Comportamento")]
-    [Tooltip("Se true, esse trigger só funciona uma vez.")]
+    [Tooltip("Se marcado, só dispara uma vez.")]
     public bool onlyOnce = true;
 
     private bool triggered = false;
-    private Collider2D col;
 
-    void Awake()
-    {
-        col = GetComponent<Collider2D>();
-        col.isTrigger = true; // garante que seja trigger
-    }
+    [Header("Spawn do Boss")]
+    [Tooltip("Prefab do boss (se quiser instanciar quando entrar). Opcional se usar bossInstance.")]
+    public GameObject bossPrefab;
 
-    void OnTriggerEnter2D(Collider2D other)
+    [Tooltip("Boss já na cena, mas DESATIVADO no início. Opcional se usar bossPrefab.")]
+    public GameObject bossInstance;
+
+    [Tooltip("Ponto onde o boss deve nascer / ser colocado.")]
+    public Transform bossSpawnPoint;
+
+    private bool bossSpawned = false;
+
+    [Header("Opções de Limpeza de Inimigos")]
+    [Tooltip("Se marcado, inimigos fora da bossAreaCollider serão despawnados ao entrar.")]
+    public bool despawnEnemiesOutsideArena = true;
+
+    private void OnTriggerEnter2D(Collider2D other)
     {
         if (!other.CompareTag("Player")) return;
-        if (onlyOnce && triggered) return;
 
+        if (onlyOnce && triggered) return;
         triggered = true;
 
-        // 1) Ativa a parede invisível
+        Debug.Log("[BossArenaTrigger] Player entrou na arena do boss.");
+
+        // 1) Ativa parede invisível para impedir retorno
         if (backWallCollider != null)
         {
             backWallCollider.enabled = true;
             Debug.Log("[BossArenaTrigger] Parede invisível ativada.");
         }
-        else
+
+        // 2) Limpa zumbis fora da arena (voltam pro pool)
+        if (despawnEnemiesOutsideArena && bossAreaCollider != null)
         {
-            Debug.LogWarning("[BossArenaTrigger] backWallCollider não atribuído.");
+            DespawnEnemiesOutsideArena();
         }
 
-        // 2) Limpa todos os zumbis que NÃO estiverem dentro da Área 3
-        if (bossAreaCollider != null)
-        {
-            EnemyHealth[] enemies = FindObjectsOfType<EnemyHealth>();
+        // 3) Spawna / ativa o boss
+        SpawnBossIfNeeded();
+    }
 
-            int cleaned = 0;
-            foreach (var e in enemies)
+    private void DespawnEnemiesOutsideArena()
+    {
+        EnemyHealth[] enemies = FindObjectsOfType<EnemyHealth>();
+        int countDespawned = 0;
+
+        foreach (var e in enemies)
+        {
+            if (e == null || !e.isActiveAndEnabled) continue;
+
+            Vector2 pos = e.transform.position;
+
+            // Se NÃO está dentro da área do boss → some
+            if (!bossAreaCollider.OverlapPoint(pos))
             {
-                if (!e.isActiveAndEnabled) continue;
-
-                // Pega posição do transform (pivô do inimigo)
-                Vector2 pos = e.transform.position;
-
-                // Se NÃO está dentro do colisor da boss arena → some sem score
-                if (!bossAreaCollider.OverlapPoint(pos))
-                {
-                    e.ForceDespawnWithoutScore();
-                    cleaned++;
-                }
+                e.ForceDespawnWithoutScore(); // método que você já tem no EnemyHealth
+                countDespawned++;
             }
+        }
 
-            Debug.Log($"[BossArenaTrigger] Limpou {cleaned} inimigos fora da boss arena.");
+        Debug.Log($"[BossArenaTrigger] Despawnados {countDespawned} inimigos fora da arena do boss.");
+    }
+
+    private void SpawnBossIfNeeded()
+    {
+        if (bossSpawned) return;
+
+        Vector3 spawnPos = bossSpawnPoint != null ? bossSpawnPoint.position : transform.position;
+        Quaternion spawnRot = Quaternion.identity;
+
+        if (bossInstance != null)
+        {
+            // Caso 1: boss já existe na cena, só ativar
+            bossInstance.transform.position = spawnPos;
+            bossInstance.transform.rotation = spawnRot;
+            bossInstance.SetActive(true);
+
+            Debug.Log("[BossArenaTrigger] BossInstance ativado.");
+        }
+        else if (bossPrefab != null)
+        {
+            // Caso 2: instanciar o boss a partir de um prefab
+            bossInstance = Instantiate(bossPrefab, spawnPos, spawnRot);
+            Debug.Log("[BossArenaTrigger] BossPrefab instanciado.");
         }
         else
         {
-            Debug.LogWarning("[BossArenaTrigger] bossAreaCollider não atribuído.");
+            Debug.LogWarning("[BossArenaTrigger] Nenhum bossPrefab ou bossInstance definido!");
         }
 
-        // 3) Opcional: desativa o próprio trigger
-        if (onlyOnce)
-        {
-            col.enabled = false;
-        }
+        bossSpawned = true;
     }
 }
