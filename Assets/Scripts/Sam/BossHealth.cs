@@ -1,6 +1,6 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.SceneManagement; // <- IMPORTANTE pra trocar de cena
+using UnityEngine.SceneManagement;
 
 public class BossHealth : MonoBehaviour
 {
@@ -20,8 +20,29 @@ public class BossHealth : MonoBehaviour
     [Header("Cena ao morrer")]
     [Tooltip("Nome da cena de final (precisa estar no Build Settings).")]
     public string endSceneName = "End";
-    [Tooltip("Delay antes de carregar a cena (pra dar tempo de animação, som, etc).")]
-    public float sceneChangeDelay = 2f;
+
+    [Header("Fade Out na Morte")]
+    [Tooltip("Tempo que o boss leva para sumir (fade).")]
+    public float fadeDuration = 1.2f;
+    [Tooltip("Tempo extra depois do fade antes de carregar a cena.")]
+    public float afterFadeDelay = 0.5f;
+
+    [Header("Áudio de Morte")]
+    [Tooltip("Som do grito/morte do boss.")]
+    public AudioClip deathSFX;
+
+    // Pode ir até 2 aqui, mas lembre que o AudioClip em si também tem volume.
+    [Range(0f, 2f)]
+    public float deathSFXVolume = 1.0f;
+
+    [Tooltip("Se marcado, toca o som em 2D na câmera (sem perder volume por distância).")]
+    public bool deathSFXAs2D = true;
+
+    [Header("Camera Shake na Morte")]
+    [Tooltip("Câmera que vai tremer. Se vazio, usa Camera.main.")]
+    public Camera cameraToShake;
+    public float shakeDuration = 0.3f;
+    public float shakeMagnitude = 0.25f;
 
     SpriteRenderer[] renderers;
     Color[] baseColors;
@@ -29,6 +50,7 @@ public class BossHealth : MonoBehaviour
 
     void Awake()
     {
+        // cache dos renderers
         renderers = GetComponentsInChildren<SpriteRenderer>(includeInactive: false);
 
         baseColors = new Color[renderers.Length];
@@ -40,6 +62,12 @@ public class BossHealth : MonoBehaviour
         }
 
         currentHealth = maxHealth;
+
+        // tenta pegar camera principal se não tiver setado
+        if (cameraToShake == null)
+        {
+            cameraToShake = Camera.main;
+        }
     }
 
     void OnEnable()
@@ -51,7 +79,7 @@ public class BossHealth : MonoBehaviour
         var cols = GetComponentsInChildren<Collider2D>(includeInactive: true);
         foreach (var c in cols) c.enabled = true;
 
-        // reativa sprites / cores
+        // reativa sprites e garante alpha 1
         if (renderers == null || renderers.Length == 0)
             renderers = GetComponentsInChildren<SpriteRenderer>(includeInactive: true);
 
@@ -61,6 +89,7 @@ public class BossHealth : MonoBehaviour
             if (!r) continue;
 
             r.enabled = true;
+
             var col = baseColors != null && baseColors.Length > i ? baseColors[i] : Color.white;
             col.a = 1f;
             r.color = col;
@@ -69,11 +98,14 @@ public class BossHealth : MonoBehaviour
         RestoreVisuals();
     }
 
-    // ====== DANO ENTRANDO PELO COLIDER (BULLET / SHOTGUN) ======
+    // ======================
+    // DANO ENTRANDO PELO COLIDER (BULLET / SHOTGUN)
+    // ======================
     void OnTriggerEnter2D(Collider2D other)
     {
         int dmg = 0;
 
+        // Bala normal
         Bullet bullet = other.GetComponent<Bullet>();
         if (bullet != null)
         {
@@ -82,6 +114,7 @@ public class BossHealth : MonoBehaviour
         }
         else
         {
+            // Pellet de shotgun
             ShotgunPellet pellet = other.GetComponent<ShotgunPellet>();
             if (pellet != null)
             {
@@ -115,6 +148,7 @@ public class BossHealth : MonoBehaviour
     {
         if (useMaterialSwap && flashMaterial != null)
         {
+            // troca material
             for (int i = 0; i < renderers.Length; i++)
             {
                 if (renderers[i] && renderers[i].sharedMaterial != flashMaterial)
@@ -123,6 +157,7 @@ public class BossHealth : MonoBehaviour
 
             yield return new WaitForSeconds(flashDuration);
 
+            // volta pro material original
             for (int i = 0; i < renderers.Length; i++)
             {
                 if (renderers[i])
@@ -131,6 +166,7 @@ public class BossHealth : MonoBehaviour
         }
         else
         {
+            // só pinta de outra cor
             for (int i = 0; i < renderers.Length; i++)
             {
                 if (renderers[i])
@@ -149,19 +185,97 @@ public class BossHealth : MonoBehaviour
 
     void Die()
     {
-        // desativa colisores
+        // desliga lógica de movimento/ataque
+        var bossController = GetComponent<BossController>();
+        if (bossController != null)
+            bossController.enabled = false;
+
+        // desativa colisores pra não bater mais em nada
         var cols = GetComponentsInChildren<Collider2D>();
         foreach (var c in cols) c.enabled = false;
 
-        // aqui você pode tocar animação / som de morte
-        // ex: GetComponent<Animator>()?.SetTrigger("Die");
+        // toca som de morte
+        PlayDeathSFX();
 
-        StartCoroutine(LoadEndSceneAfterDelay());
+        // inicia fade + camera shake + troca de cena
+        StartCoroutine(FadeOutAndChangeScene());
     }
 
-    IEnumerator LoadEndSceneAfterDelay()
+    void PlayDeathSFX()
     {
-        yield return new WaitForSeconds(sceneChangeDelay);
+        if (deathSFX == null) return;
+
+        // 2D na câmera (sem atenuação por distância)
+        if (deathSFXAs2D && Camera.main != null)
+        {
+            GameObject go = new GameObject("BossDeathSFX");
+            go.transform.position = Camera.main.transform.position;
+
+            var src = go.AddComponent<AudioSource>();
+            src.clip = deathSFX;
+            src.volume = Mathf.Clamp01(deathSFXVolume);
+            src.spatialBlend = 0f; // 0 = som 2D
+            src.playOnAwake = false;
+
+            src.Play();
+            Destroy(go, deathSFX.length + 0.1f);
+        }
+        else
+        {
+            // fallback 3D no mundo (perde volume com distância)
+            AudioSource.PlayClipAtPoint(
+                deathSFX,
+                transform.position,
+                Mathf.Clamp01(deathSFXVolume)
+            );
+        }
+    }
+
+    IEnumerator FadeOutAndChangeScene()
+    {
+        // começa o shake da câmera em paralelo
+        StartCoroutine(ShakeCameraCoroutine());
+
+        float t = 0f;
+
+        // guarda cores iniciais
+        Color[] startColors = new Color[renderers.Length];
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            if (renderers[i])
+                startColors[i] = renderers[i].color;
+        }
+
+        while (t < fadeDuration)
+        {
+            t += Time.deltaTime;
+            float lerp = Mathf.Clamp01(t / fadeDuration);
+
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                var r = renderers[i];
+                if (!r) continue;
+
+                Color c = startColors[i];
+                c.a = Mathf.Lerp(startColors[i].a, 0f, lerp);
+                r.color = c;
+            }
+
+            yield return null;
+        }
+
+        // garante alpha 0
+        for (int i = 0; i < renderers.Length; i++)
+        {
+            var r = renderers[i];
+            if (!r) continue;
+
+            Color c = r.color;
+            c.a = 0f;
+            r.color = c;
+        }
+
+        yield return new WaitForSeconds(afterFadeDelay);
 
         if (!string.IsNullOrEmpty(endSceneName))
         {
@@ -171,6 +285,29 @@ public class BossHealth : MonoBehaviour
         {
             Debug.LogError("[BossHealth] endSceneName não configurado!");
         }
+    }
+
+    IEnumerator ShakeCameraCoroutine()
+    {
+        if (cameraToShake == null) yield break;
+
+        Transform camT = cameraToShake.transform;
+        Vector3 originalPos = camT.position;
+
+        float elapsed = 0f;
+
+        while (elapsed < shakeDuration)
+        {
+            elapsed += Time.deltaTime;
+            float strength = shakeMagnitude * (1f - (elapsed / shakeDuration));
+
+            Vector2 offset = Random.insideUnitCircle * strength;
+            camT.position = originalPos + new Vector3(offset.x, offset.y, 0f);
+
+            yield return null;
+        }
+
+        camT.position = originalPos;
     }
 
     void RestoreVisuals()
