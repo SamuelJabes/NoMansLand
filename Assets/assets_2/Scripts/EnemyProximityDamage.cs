@@ -9,12 +9,16 @@ public class EnemyProximityDamage : MonoBehaviour
     public HeartsHealthUI heartsUI;
 
     [Tooltip("Distância máxima para causar dano.")]
-    public float damageRange = 1.5f;
+    public float damageRange = 0.7f;
 
     [Tooltip("Dano em unidades por segundo (1 = meio coração).")]
     public float damageUnitsPerSecond = 1f;
 
-    float damageTimer;
+    [Tooltip("Tempo entre cada hit de dano (em segundos). Menor = mais rápido.")]
+    public float damageInterval = 0.5f; // Dano a cada 0.5s por padrão
+
+    private float damageTimer;
+    private bool hasDealtFirstDamage = false;
 
     void Start()
     {
@@ -38,8 +42,18 @@ public class EnemyProximityDamage : MonoBehaviour
         {
             damageTimer += Time.deltaTime;
 
-            if (damageTimer >= 1f / damageUnitsPerSecond)
+            // Primeiro dano é imediato ao entrar no range
+            if (!hasDealtFirstDamage)
             {
+                Debug.Log($"[DANO] {gameObject.name} causou dano no player! Distância: {dist:F2}");
+                heartsUI.TakeDamage(1);
+                hasDealtFirstDamage = true;
+                damageTimer = 0f;
+            }
+            // Danos subsequentes seguem o intervalo configurado
+            else if (damageTimer >= damageInterval)
+            {
+                Debug.Log($"[DANO] {gameObject.name} causou dano no player! Distância: {dist:F2}");
                 heartsUI.TakeDamage(1); // meio coração
                 damageTimer = 0f;
             }
@@ -47,6 +61,10 @@ public class EnemyProximityDamage : MonoBehaviour
         else
         {
             damageTimer = 0f; // reseta se afastar
+            hasDealtFirstDamage = false; // reseta flag para próximo contato
         }
     }
+
+
+
 }
