@@ -4,6 +4,7 @@ public class WeaponManager : MonoBehaviour
 {
     [Header("Armas disponíveis")]
     public GameObject pistolPrefab;  // Prefab da Pistol
+    public GameObject shotgunPrefab; // Prefab da Shotgun
     public GameObject mgPrefab;      // Prefab da MG
 
     [Header("Spawn point da arma")]
@@ -49,6 +50,9 @@ public class WeaponManager : MonoBehaviour
             case WeaponType.Pistol:
                 weaponPrefab = pistolPrefab;
                 break;
+            case WeaponType.Shotgun:
+                weaponPrefab = shotgunPrefab;
+                break;
             case WeaponType.MG:
                 weaponPrefab = mgPrefab;
                 break;
@@ -86,5 +90,6 @@ public class WeaponManager : MonoBehaviour
 public enum WeaponType
 {
     Pistol,
+    Shotgun,
     MG
 }
