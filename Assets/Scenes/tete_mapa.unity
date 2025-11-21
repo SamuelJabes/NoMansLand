@@ -53282,6 +53282,71 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!1 &346160938
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 346160939}
+  - component: {fileID: 346160940}
+  m_Layer: 5
+  m_Name: HeartsHealthUI
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &346160939
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 346160938}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 58921239}
+  m_Father: {fileID: 175706767}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: -300, y: -520}
+  m_SizeDelta: {x: 30, y: 30}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &346160940
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 346160938}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: af6b19cd9b1f35b4fb16bdb02bbea3d4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  heartImages:
+  - {fileID: 2057407060}
+  - {fileID: 445013845}
+  - {fileID: 1487532937}
+  fullSprite: {fileID: 8677360721932010878, guid: a05d28beb4d12a04ca0af49f398b9e6b, type: 3}
+  halfSprite: {fileID: -193348711614450820, guid: dc24becd6baef224497fcc2433af6f2c, type: 3}
+  emptySprite: {fileID: 8113059378047358038, guid: 5e25735e39e401b40b6ed0bae7854cba, type: 3}
+  maxHearts: 3
+  currentUnits: 6
+  flashDuration: 0.18
+  flashColor: {r: 1, g: 1, b: 1, a: 1}
+  audioSource: {fileID: 0}
+  hurtSfx: {fileID: 0}
+  gameOverScene: Main_menu
+  deathDelay: 1
+  deathSfx: {fileID: 0}
 --- !u!1 &346422562
 GameObject:
   m_ObjectHideFlags: 0
@@ -57060,7 +57125,7 @@ Transform:
   m_GameObject: {fileID: 387807153}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 65.56, y: 18.4, z: 0.027445571}
+  m_LocalPosition: {x: 83.7, y: 18.5, z: 0.027445571}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -73041,7 +73106,6 @@ MonoBehaviour:
   - {fileID: 2037622435}
   - {fileID: 527039985}
   - {fileID: 1084667050}
-  - {fileID: 1895934960}
   area2Points:
   - {fileID: 1714763327}
   - {fileID: 1194109757}
