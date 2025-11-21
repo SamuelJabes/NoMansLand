@@ -118,6 +118,8 @@ public class WeaponStation : MonoBehaviour
 
     void TryPurchase()
     {
+        Debug.Log($"[WeaponStation] Tentando comprar {weaponType} por {price} moedas");
+        
         // Verifica se já comprou
         if (alreadyPurchased && !canBuyMultipleTimes)
         {
@@ -131,6 +133,8 @@ public class WeaponStation : MonoBehaviour
             Debug.LogError("ScoreManager não encontrado!");
             return;
         }
+        
+        Debug.Log($"[WeaponStation] Player tem {scoreManager.CurrentCoins} moedas");
 
         if (scoreManager.CurrentCoins < price)
         {
