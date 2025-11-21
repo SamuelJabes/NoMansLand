@@ -87302,8 +87302,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbb2d38379c81fd4f857e97fdaff38cd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  weaponType: 1
-  price: 10
+  weaponType: 2
+  price: 250
   messageText: {fileID: 353961897}
   interactionUI: {fileID: 386550090}
   stationSprite: {fileID: 525400932}
@@ -115569,7 +115569,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4671a79f37f106c45a5ef3b3ad649aac, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  price: 150
+  price: 1500
   doorName: BOSS
   interactionUI: {fileID: 1394209702}
   messageText: {fileID: 2078670204}
@@ -165961,7 +165961,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 848a05e13287469418e55f71ad5a9c84, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHealth: 5
+  maxHealth: 100
   useMaterialSwap: 1
   flashMaterial: {fileID: 2100000, guid: ca94eebd2d926e24fa8ae829dcfe4563, type: 2}
   flashColor: {r: 1, g: 0.95, b: 0.8, a: 1}
@@ -236532,7 +236532,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   weaponType: 1
-  price: 10
+  price: 150
   messageText: {fileID: 353961897}
   interactionUI: {fileID: 386550090}
   stationSprite: {fileID: 1681932175}

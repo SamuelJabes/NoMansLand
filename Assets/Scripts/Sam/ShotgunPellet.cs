@@ -42,4 +42,28 @@ public class ShotgunPellet : MonoBehaviour
             Destroy(gameObject);
         }
     }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        // Verifica se acertou um inimigo
+        EnemyHealth enemy = other.GetComponent<EnemyHealth>();
+        if (enemy != null)
+        {
+            enemy.TakeDamage(damage);
+            Destroy(gameObject);
+            return;
+        }
+
+        // Verifica se acertou o boss
+        BossHealth boss = other.GetComponent<BossHealth>();
+        if (boss != null)
+        {
+            boss.TakeDamage(damage);
+            Destroy(gameObject);
+            return;
+        }
+
+        // Destrói ao colidir com paredes/obstáculos (opcional)
+        // Se quiser que atravesse inimigos mas pare em paredes, adicione layer check aqui
+    }
 }

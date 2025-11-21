@@ -202,7 +202,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bullet: {fileID: 1503819010447029758, guid: 5beece9e2dc87bd46b473611f9bb46c0, type: 3}
   muzzle: {fileID: 7186365638213775633}
-  fireRate: 0.7
+  fireRate: 0.9
   pellets: 7
   coneDegrees: 12
   allowHoldToFire: 0
