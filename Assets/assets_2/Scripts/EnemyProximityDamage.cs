@@ -9,7 +9,7 @@ public class EnemyProximityDamage : MonoBehaviour
     public HeartsHealthUI heartsUI;
 
     [Tooltip("Distância máxima para causar dano.")]
-    public float damageRange = 0.7f;
+    public float damageRange = 0.7f; // Reduzido para contato mais próximo
 
     [Tooltip("Dano em unidades por segundo (1 = meio coração).")]
     public float damageUnitsPerSecond = 1f;
@@ -19,6 +19,7 @@ public class EnemyProximityDamage : MonoBehaviour
 
     private float damageTimer;
     private bool hasDealtFirstDamage = false;
+    private EnemyHealth enemyHealth; // Referência para verificar se está morto
 
     void Start()
     {
@@ -30,11 +31,20 @@ public class EnemyProximityDamage : MonoBehaviour
 
         if (heartsUI == null)
             heartsUI = FindObjectOfType<HeartsHealthUI>();
+
+        // Busca o componente EnemyHealth no mesmo GameObject
+        enemyHealth = GetComponent<EnemyHealth>();
     }
 
     void Update()
     {
         if (player == null || heartsUI == null) return;
+
+        // NÃO causa dano se o zombie estiver morto
+        if (enemyHealth != null && enemyHealth.IsDead())
+        {
+            return;
+        }
 
         float dist = Vector3.Distance(transform.position, player.position);
 
@@ -64,7 +74,4 @@ public class EnemyProximityDamage : MonoBehaviour
             hasDealtFirstDamage = false; // reseta flag para próximo contato
         }
     }
-
-
-
 }

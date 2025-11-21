@@ -1760,6 +1760,8 @@ MonoBehaviour:
   coinText: {fileID: 864511455}
   coinDigits: 2
   coinsPerScore: 10
+  scoreTextObjectName: ScoreText
+  coinTextObjectName: CoinText
 --- !u!4 &16764668
 Transform:
   m_ObjectHideFlags: 0
@@ -22181,7 +22183,7 @@ MonoBehaviour:
   flashColor: {r: 1, g: 1, b: 1, a: 1}
   audioSource: {fileID: 0}
   hurtSfx: {fileID: 0}
-  gameOverScene: Main_menu
+  gameOverScene: Game_Over
   deathDelay: 1
   deathSfx: {fileID: 0}
 --- !u!1 &124701339
@@ -57202,7 +57204,7 @@ Transform:
   m_GameObject: {fileID: 387807153}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 64.73, y: 15.5, z: 0.027445571}
+  m_LocalPosition: {x: 3.09, y: -7.76, z: 0.027445571}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
