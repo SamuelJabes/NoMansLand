@@ -27,19 +27,19 @@ public class BossHealth : MonoBehaviour
     [Tooltip("Tempo extra depois do fade antes de carregar a cena.")]
     public float afterFadeDelay = 0.5f;
 
-    [Header("Áudio de Morte")]
+    [Header("ï¿½udio de Morte")]
     [Tooltip("Som do grito/morte do boss.")]
     public AudioClip deathSFX;
 
-    // Pode ir até 2 aqui, mas lembre que o AudioClip em si também tem volume.
+    // Pode ir atï¿½ 2 aqui, mas lembre que o AudioClip em si tambï¿½m tem volume.
     [Range(0f, 2f)]
     public float deathSFXVolume = 1.0f;
 
-    [Tooltip("Se marcado, toca o som em 2D na câmera (sem perder volume por distância).")]
+    [Tooltip("Se marcado, toca o som em 2D na cï¿½mera (sem perder volume por distï¿½ncia).")]
     public bool deathSFXAs2D = true;
 
     [Header("Camera Shake na Morte")]
-    [Tooltip("Câmera que vai tremer. Se vazio, usa Camera.main.")]
+    [Tooltip("Cï¿½mera que vai tremer. Se vazio, usa Camera.main.")]
     public Camera cameraToShake;
     public float shakeDuration = 0.3f;
     public float shakeMagnitude = 0.25f;
@@ -63,7 +63,7 @@ public class BossHealth : MonoBehaviour
 
         currentHealth = maxHealth;
 
-        // tenta pegar camera principal se não tiver setado
+        // tenta pegar camera principal se nï¿½o tiver setado
         if (cameraToShake == null)
         {
             cameraToShake = Camera.main;
@@ -144,6 +144,14 @@ public class BossHealth : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Retorna se o boss estÃ¡ morto (para auto-aim system)
+    /// </summary>
+    public bool IsDead()
+    {
+        return dead;
+    }
+
     IEnumerator FlashOnce()
     {
         if (useMaterialSwap && flashMaterial != null)
@@ -166,7 +174,7 @@ public class BossHealth : MonoBehaviour
         }
         else
         {
-            // só pinta de outra cor
+            // sï¿½ pinta de outra cor
             for (int i = 0; i < renderers.Length; i++)
             {
                 if (renderers[i])
@@ -185,12 +193,12 @@ public class BossHealth : MonoBehaviour
 
     void Die()
     {
-        // desliga lógica de movimento/ataque
+        // desliga lï¿½gica de movimento/ataque
         var bossController = GetComponent<BossController>();
         if (bossController != null)
             bossController.enabled = false;
 
-        // desativa colisores pra não bater mais em nada
+        // desativa colisores pra nï¿½o bater mais em nada
         var cols = GetComponentsInChildren<Collider2D>();
         foreach (var c in cols) c.enabled = false;
 
@@ -205,7 +213,7 @@ public class BossHealth : MonoBehaviour
     {
         if (deathSFX == null) return;
 
-        // 2D na câmera (sem atenuação por distância)
+        // 2D na cï¿½mera (sem atenuaï¿½ï¿½o por distï¿½ncia)
         if (deathSFXAs2D && Camera.main != null)
         {
             GameObject go = new GameObject("BossDeathSFX");
@@ -222,7 +230,7 @@ public class BossHealth : MonoBehaviour
         }
         else
         {
-            // fallback 3D no mundo (perde volume com distância)
+            // fallback 3D no mundo (perde volume com distï¿½ncia)
             AudioSource.PlayClipAtPoint(
                 deathSFX,
                 transform.position,
@@ -233,7 +241,7 @@ public class BossHealth : MonoBehaviour
 
     IEnumerator FadeOutAndChangeScene()
     {
-        // começa o shake da câmera em paralelo
+        // comeï¿½a o shake da cï¿½mera em paralelo
         StartCoroutine(ShakeCameraCoroutine());
 
         float t = 0f;
@@ -283,7 +291,7 @@ public class BossHealth : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[BossHealth] endSceneName não configurado!");
+            Debug.LogError("[BossHealth] endSceneName nï¿½o configurado!");
         }
     }
 

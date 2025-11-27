@@ -7,12 +7,15 @@ public class ShootMG : MonoBehaviour
     public GameObject bullet;
     public Transform muzzle;                   // opcional
     [Min(0.03f)] public float fireInterval = 0.08f; // menor intervalo entre tiros (DPS)
-    [Tooltip("Pequena dispers„o por tiro (graus). 0 = sem spread")]
+    [Tooltip("Pequena dispersÔøΩo por tiro (graus). 0 = sem spread")]
     [Range(0f, 10f)] public float spreadDegrees = 2.0f;
 
-    [Header("¡udio")]
+    [Header("√Åudio")]
     [Range(0f, 1f)] public float volume = 1f;
     [Range(0f, 0.5f)] public float pitchVariance = 0.03f;
+
+    [Header("Mobile")]
+    public ShootButton shootButton;
 
     private AudioSource audioSource;
     private float nextFireTime = 0f;
@@ -20,16 +23,37 @@ public class ShootMG : MonoBehaviour
     void Awake()
     {
         audioSource = GetComponent<AudioSource>();
+        
+        // Auto-discovery do ShootButton se n√£o conectado manualmente
+        if (shootButton == null)
+        {
+            shootButton = FindObjectOfType<ShootButton>();
+        }
     }
 
     void Update()
     {
-        // AUTOM¡TICO: pode segurar para atirar
-        if (Input.GetMouseButton(0) && Time.time >= nextFireTime)
+        // AUTOM√ÅTICO: pode segurar para atirar
+        if (GetShootInput() && Time.time >= nextFireTime)
         {
             nextFireTime = Time.time + fireInterval;
             FireOne();
         }
+    }
+
+    bool GetShootInput()
+    {
+        // Mobile: usar ShootButton
+        if (MobileInputManager.Instance != null && MobileInputManager.Instance.IsMobile)
+        {
+            if (shootButton != null)
+            {
+                return shootButton.IsPressed; // MG √© sempre autom√°tico (hold)
+            }
+        }
+
+        // PC: usar mouse
+        return Input.GetMouseButton(0);
     }
 
     void FireOne()

@@ -6,9 +6,12 @@ public class Shoot : MonoBehaviour
     public GameObject bullet;
     public float fireRate = 0.2f; // intervalo entre tiros (em segundos)
 
-    [Header("�udio")]
+    [Header("�udio")]
     [Range(0f, 1f)] public float volume = 1f;
     [Range(0f, 0.5f)] public float pitchVariance = 0.05f;
+
+    [Header("Mobile")]
+    public ShootButton shootButton;
 
     private AudioSource audioSource;
     private float nextFireTime = 0f;
@@ -16,11 +19,19 @@ public class Shoot : MonoBehaviour
     void Awake()
     {
         audioSource = GetComponent<AudioSource>();
+        
+        // Tenta encontrar o botão de tiro automaticamente
+        if (shootButton == null)
+        {
+            shootButton = FindObjectOfType<ShootButton>();
+        }
     }
 
     void Update()
     {
-        if (Input.GetMouseButton(0) && Time.time >= nextFireTime)
+        bool wantsToShoot = GetShootInput();
+
+        if (wantsToShoot && Time.time >= nextFireTime)
         {
             nextFireTime = Time.time + fireRate;
 
@@ -34,5 +45,18 @@ public class Shoot : MonoBehaviour
                 audioSource.pitch = oldPitch;
             }
         }
+    }
+
+    bool GetShootInput()
+    {
+        // Mobile: usa botão de tiro
+        if (MobileInputManager.Instance != null && MobileInputManager.Instance.IsMobile)
+        {
+            if (shootButton != null)
+                return shootButton.IsPressed;
+        }
+
+        // PC: usa mouse
+        return Input.GetMouseButton(0);
     }
 }

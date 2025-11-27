@@ -4,16 +4,20 @@ public class WeaponOrbit2D : MonoBehaviour
 {
     [Header("Refs")]
     public Transform player;          // arraste o Transform do player
-    public Camera cam;                // arraste a câmera (se vazio usa Camera.main)
+    public Camera cam;                // arraste a cï¿½mera (se vazio usa Camera.main)
 
-    [Header("Órbita")]
-    [Min(0.01f)] public float radius = 1.0f;     // raio da órbita
-    [Range(0.01f, 50f)] public float followLerp = 25f;  // suavidade de posição (maior = mais “grudado”)
+    [Header("Mobile Auto-Aim (Opcional)")]
+    [Tooltip("Sistema de auto-aim para mobile. Se vazio, busca automaticamente.")]
+    public AutoAimSystem autoAim;
 
-    [Header("Rotação da arma")]
-    public bool faceMouse = true;                 // true: arma aponta pro mouse
-    [Range(0.01f, 50f)] public float rotateLerp = 25f;  // suavidade da rotação
-    public float angleOffsetDeg = 0f;             // ajuste fino se o sprite está “de lado”
+    [Header("ï¿½rbita")]
+    [Min(0.01f)] public float radius = 1.0f;     // raio da ï¿½rbita
+    [Range(0.01f, 50f)] public float followLerp = 25f;  // suavidade de posiï¿½ï¿½o (maior = mais ï¿½grudadoï¿½)
+
+    [Header("Rotaï¿½ï¿½o da arma")]
+    public bool faceMouse = true;                 // true: arma aponta pro mouse (ou auto-aim em mobile)
+    [Range(0.01f, 50f)] public float rotateLerp = 25f;  // suavidade da rotaï¿½ï¿½o
+    public float angleOffsetDeg = 0f;             // ajuste fino se o sprite estï¿½ ï¿½de ladoï¿½
 
     void Awake()
     {
@@ -23,35 +27,34 @@ public class WeaponOrbit2D : MonoBehaviour
             var p = GameObject.FindGameObjectWithTag("Player");
             if (p) player = p.transform;
         }
+
+        // Tenta encontrar o auto-aim automaticamente
+        if (autoAim == null)
+        {
+            autoAim = FindObjectOfType<AutoAimSystem>();
+        }
     }
 
     void LateUpdate()
     {
         if (!player || !cam) return;
 
-        // ===== 1) pegar mouse em mundo (2D) =====
-        // funciona com câmera ortográfica ou perspectiva:
-        float zDist = Mathf.Abs(cam.transform.position.z - player.position.z);
-        Vector3 mouseWorld = cam.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, zDist));
-        // manter no plano 2D do player
-        mouseWorld.z = player.position.z;
-
-        // ===== 2) direção player->mouse (XY) =====
-        Vector2 dir = (mouseWorld - player.position);
-        if (dir.sqrMagnitude < 0.00001f) return;  // se mouse “em cima” do player, evita NaN
+        // Obtï¿½m direï¿½ï¿½o de acordo com a plataforma (Auto-aim ou Mouse)
+        Vector2 dir = GetAimDirection();
+        if (dir.sqrMagnitude < 0.00001f) return;  // evita NaN
         dir.Normalize();
 
-        // ===== 3) posição alvo na órbita =====
+        // ===== 1) posiï¿½ï¿½o alvo na ï¿½rbita =====
         Vector3 targetPos = player.position + (Vector3)(dir * radius);
 
-        // suaviza a transição (lerp exponencial)
+        // suaviza a transiï¿½ï¿½o (lerp exponencial)
         float tFollow = 1f - Mathf.Exp(-followLerp * Time.deltaTime);
         transform.position = Vector3.Lerp(transform.position, targetPos, tFollow);
 
-        // ===== 4) rotação da arma (opcional) =====
+        // ===== 2) rotaï¿½ï¿½o da arma (opcional) =====
         if (faceMouse)
         {
-            // ângulo em graus (0° no +X, cresce CCW). Para apontar “para o mouse”:
+            // ï¿½ngulo em graus (0ï¿½ no +X, cresce CCW)
             float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg + angleOffsetDeg;
             float current = transform.eulerAngles.z;
             float target = ang;
@@ -61,5 +64,31 @@ public class WeaponOrbit2D : MonoBehaviour
             float newZ = Mathf.LerpAngle(current, target, tRot);
             transform.rotation = Quaternion.Euler(0f, 0f, newZ);
         }
+    }
+
+    /// <summary>
+    /// Obtï¿½m direï¿½ï¿½o de mira de acordo com a plataforma
+    /// </summary>
+    Vector2 GetAimDirection()
+    {
+        // Prioridade 1: Auto-Aim (se estiver mobile e tiver alvo)
+        if (MobileInputManager.Instance != null && MobileInputManager.Instance.IsMobile)
+        {
+            if (autoAim != null && autoAim.HasTarget)
+            {
+                return autoAim.GetAimDirection();
+            }
+            // Se mobile mas sem alvo, aponta para frente (direï¿½ï¿½o do movimento)
+            // Isso evita que a arma fique parada
+            return Vector2.right; // ou pegar direï¿½ï¿½o do movimento do player
+        }
+
+        // Prioridade 2: Mouse (PC)
+        float zDist = Mathf.Abs(cam.transform.position.z - player.position.z);
+        Vector3 mouseWorld = cam.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, zDist));
+        mouseWorld.z = player.position.z;
+
+        Vector2 dir = (mouseWorld - player.position);
+        return dir;
     }
 }

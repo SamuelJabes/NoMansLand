@@ -29,6 +29,9 @@ public class DoorPurchase : MonoBehaviour
     [Header("Debug")]
     [SerializeField] private bool showDebugMessages = true;
     
+    [Header("Mobile")]
+    public InteractButton interactButton;
+    
     private bool playerInRange = false;
     private bool isPurchased = false;
     private SpriteRenderer spriteRenderer;
@@ -70,17 +73,44 @@ public class DoorPurchase : MonoBehaviour
         {
             audioSource = GetComponent<AudioSource>();
         }
+        
+        // Tenta encontrar o botão de interação
+        if (interactButton == null)
+        {
+            interactButton = FindObjectOfType<InteractButton>();
+            if (interactButton != null)
+            {
+                Debug.Log("[DoorPurchase] InteractButton encontrado!");
+            }
+            else
+            {
+                Debug.LogWarning("[DoorPurchase] InteractButton NÃO encontrado! Botão não vai aparecer em mobile.");
+            }
+        }
     }
     
     void Update()
     {
         if (isPurchased || !playerInRange) return;
         
-        // Detecta input de interação (tecla E)
-        if (Input.GetKeyDown(KeyCode.E))
+        // Detecta input de interação (tecla E ou botão mobile)
+        if (GetInteractInput())
         {
             TryPurchase();
         }
+    }
+    
+    bool GetInteractInput()
+    {
+        // Mobile: usa botão de interação
+        if (MobileInputManager.Instance != null && MobileInputManager.Instance.IsMobile)
+        {
+            if (interactButton != null)
+                return interactButton.WasPressedThisFrame;
+        }
+
+        // PC: usa tecla E
+        return Input.GetKeyDown(KeyCode.E);
     }
     
     void OnTriggerEnter2D(Collider2D other)
@@ -92,6 +122,17 @@ public class DoorPurchase : MonoBehaviour
             playerInRange = true;
             ShowInteractionUI();
             StartCoroutine(PulseHighlight());
+            
+            // Mostra botão de interação mobile
+            if (interactButton != null)
+            {
+                Debug.Log("[DoorPurchase] Chamando interactButton.Show()");
+                interactButton.Show();
+            }
+            else
+            {
+                Debug.LogWarning("[DoorPurchase] interactButton é NULL! Não pode mostrar.");
+            }
             
             if (showDebugMessages)
             {
@@ -106,6 +147,10 @@ public class DoorPurchase : MonoBehaviour
         {
             playerInRange = false;
             HideInteractionUI();
+            
+            // Esconde botão de interação mobile
+            if (interactButton != null)
+                interactButton.Hide();
             
             // Não para corrotinas se já foi comprado (fade out deve continuar)
             if (!isPurchased)

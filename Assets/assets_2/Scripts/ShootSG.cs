@@ -18,23 +18,47 @@ public class ShootSG : MonoBehaviour
     [Range(0f, 1f)] public float volume = 1f;
     [Range(0f, 0.5f)] public float pitchVariance = 0.04f;
 
+    [Header("Mobile")]
+    public ShootButton shootButton;
+
     private AudioSource audioSource;
     private float nextFireTime = 0f;
 
     void Awake()
     {
         audioSource = GetComponent<AudioSource>();
+        
+        // Auto-discovery do ShootButton se não conectado manualmente
+        if (shootButton == null)
+        {
+            shootButton = FindObjectOfType<ShootButton>();
+        }
     }
 
     void Update()
     {
-        bool wantsFire = allowHoldToFire ? Input.GetMouseButton(0) : Input.GetMouseButtonDown(0);
+        bool wantsFire = GetShootInput();
 
         if (wantsFire && Time.time >= nextFireTime)
         {
             nextFireTime = Time.time + fireRate;
             FireShot();
         }
+    }
+
+    bool GetShootInput()
+    {
+        // Mobile: usar ShootButton
+        if (MobileInputManager.Instance != null && MobileInputManager.Instance.IsMobile)
+        {
+            if (shootButton != null)
+            {
+                return allowHoldToFire ? shootButton.IsPressed : shootButton.WasPressedThisFrame;
+            }
+        }
+
+        // PC: usar mouse
+        return allowHoldToFire ? Input.GetMouseButton(0) : Input.GetMouseButtonDown(0);
     }
 
     void FireShot()

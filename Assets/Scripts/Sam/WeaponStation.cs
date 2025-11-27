@@ -25,6 +25,9 @@ public class WeaponStation : MonoBehaviour
     public AudioClip purchaseSuccessClip;  // Som de compra bem-sucedida
     public AudioClip purchaseFailClip;     // Som de moedas insuficientes
 
+    [Header("Mobile")]
+    public InteractButton interactButton;
+
     private bool playerInRange = false;
     private bool alreadyPurchased = false;
     private WeaponManager playerWeaponManager;
@@ -38,17 +41,36 @@ public class WeaponStation : MonoBehaviour
             interactionUI.SetActive(false);
 
         UpdateStationVisual();
+        
+        // Tenta encontrar o botão de interação
+        if (interactButton == null)
+        {
+            interactButton = FindObjectOfType<InteractButton>();
+        }
     }
 
     void Update()
     {
         if (!playerInRange) return;
 
-        // Detecta input E
-        if (Input.GetKeyDown(KeyCode.E))
+        // Detecta input E ou botão mobile
+        if (GetInteractInput())
         {
             TryPurchase();
         }
+    }
+
+    bool GetInteractInput()
+    {
+        // Mobile: usa botão de interação
+        if (MobileInputManager.Instance != null && MobileInputManager.Instance.IsMobile)
+        {
+            if (interactButton != null)
+                return interactButton.WasPressedThisFrame;
+        }
+
+        // PC: usa tecla E
+        return Input.GetKeyDown(KeyCode.E);
     }
 
     void OnTriggerEnter2D(Collider2D other)
@@ -65,6 +87,10 @@ public class WeaponStation : MonoBehaviour
             }
 
             ShowInteractionUI();
+            
+            // Mostra botão de interação mobile
+            if (interactButton != null)
+                interactButton.Show();
         }
     }
 
@@ -74,6 +100,10 @@ public class WeaponStation : MonoBehaviour
         {
             playerInRange = false;
             HideInteractionUI();
+            
+            // Esconde botão de interação mobile
+            if (interactButton != null)
+                interactButton.Hide();
         }
     }
 

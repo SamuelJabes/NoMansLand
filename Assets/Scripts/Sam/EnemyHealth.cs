@@ -128,9 +128,17 @@ public class EnemyHealth : MonoBehaviour
 
         if (currentHealth <= 0)
         {
-            dead = true; // CR�TICO: marca como morto IMEDIATAMENTE antes de chamar Die()
+            dead = true; // CRÍTICO: marca como morto IMEDIATAMENTE antes de chamar Die()
             Die();
         }
+    }
+
+    /// <summary>
+    /// Retorna se o inimigo está morto (para auto-aim system)
+    /// </summary>
+    public bool IsDead()
+    {
+        return dead;
     }
 
     IEnumerator FlashOnce()
@@ -234,11 +242,5 @@ public class EnemyHealth : MonoBehaviour
             renderers[i].color = baseColors[i];
             renderers[i].sharedMaterial = baseMaterials[i];
         }
-    }
-
-    // M�todo p�blico para verificar se o inimigo est� morto
-    public bool IsDead()
-    {
-        return dead;
     }
 }

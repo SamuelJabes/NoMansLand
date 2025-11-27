@@ -7,6 +7,7 @@ TagManager:
   - Porta
   - PortaTrigger
   - Boss
+  - Enemy
   layers:
   - Default
   - TransparentFX
